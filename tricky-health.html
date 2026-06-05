@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#01696f">
+<meta name="apple-mobile-web-app-title" content="Tricky Care">
+<title>Tricky Care — 寵物健康管家</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --color-bg: #f7f6f2;
+  --color-surface: #f9f8f5;
+  --color-primary: #01696f;
+  --color-primary-hover: #0c4e54;
+  --color-text: #28251d;
+  --color-text-muted: #7a7974;
+  --color-error: #a12c7b;
+  --color-warning: #964219;
+  --color-success: #437a22;
+  --color-border: #e5e3dc;
+  --color-banner: #fde8e8;
+  --color-banner-text: #8b1a1a;
+  --sidebar-w: 240px;
+  --tab-h: 64px;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08);
+  --radius-card: 12px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,.08);
+  --card-border: 1px solid rgba(0,0,0,.08);
+  --font: 'Noto Sans TC', system-ui, sans-serif;
+  --banner-warn-bg: #fff3e0;
+  --banner-warn-text: #964219;
+  --med-low-bg: #fff8f0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #1a1916;
+    --color-surface: #242220;
+    --color-primary: #3db8be;
+    --color-primary-hover: #5fd4da;
+    --color-text: #f0ede6;
+    --color-text-muted: #a8a69f;
+    --color-border: #3d3a35;
+    --color-banner: #3d2020;
+    --color-banner-text: #ffb4b4;
+    --shadow: 0 2px 12px rgba(0,0,0,.35);
+    --shadow-card: 0 2px 12px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="light"] {
+  --color-bg: #f7f6f2;
+  --color-surface: #f9f8f5;
+  --color-primary: #01696f;
+  --color-primary-hover: #0c4e54;
+  --color-text: #28251d;
+  --color-text-muted: #7a7974;
+  --color-border: #e5e3dc;
+  --color-banner: #fde8e8;
+  --color-banner-text: #8b1a1a;
+  --shadow: 0 2px 12px rgba(40,37,29,.08);
+  --shadow-card: 0 1px 3px rgba(0,0,0,.08);
+}
+:root[data-theme="dark"] {
+  --color-bg: #1a1916;
+  --color-surface: #242220;
+  --color-primary: #3db8be;
+  --color-primary-hover: #5fd4da;
+  --color-text: #f0ede6;
+  --color-text-muted: #a8a69f;
+  --color-border: #3d3a35;
+  --color-banner: #3d2020;
+  --color-banner-text: #ffb4b4;
+  --shadow: 0 2px 12px rgba(0,0,0,.35);
+  --shadow-card: 0 2px 12px rgba(0,0,0,.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--color-bg);color:var(--color-text);line-height:1.5;min-height:100dvh}
+button,input,select,textarea{font-family:inherit;font-size:1rem}
+a{color:var(--color-primary)}
+#app{display:flex;min-height:100dvh}
+.sidebar{display:none;position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--color-surface);border-right:1px solid var(--color-border);flex-direction:column;padding:1.25rem 0;z-index:100}
+.sidebar-brand{padding:0 1.25rem 1.5rem;font-weight:700;font-size:1.125rem;color:var(--color-primary)}
+.sidebar-nav{display:flex;flex-direction:column;gap:.25rem;flex:1;padding:0 .75rem}
+.nav-btn{display:flex;align-items:center;gap:.75rem;min-height:44px;padding:.625rem 1rem;border:none;background:transparent;color:var(--color-text-muted);border-radius:var(--radius);cursor:pointer;width:100%;text-align:left;font-weight:500;transition:background .15s,color .15s}
+.nav-btn:hover,.nav-btn.active{background:rgba(1,105,111,.12);color:var(--color-primary)}
+.nav-btn .icon,.tab-btn .icon{display:flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem}
+.nav-btn .icon svg,.tab-btn .icon svg{width:22px;height:22px}
+.sidebar-footer{padding:1rem 1.25rem;border-top:1px solid var(--color-border)}
+.theme-toggle{display:flex;align-items:center;justify-content:space-between;min-height:44px;gap:.5rem}
+.theme-toggle label{font-size:.875rem;color:var(--color-text-muted)}
+.tab-bar{display:flex;position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:var(--color-surface);border-top:1px solid var(--color-border);z-index:100;padding:0 .25rem env(safe-area-inset-bottom,0)}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:44px;min-width:44px;border:none;background:transparent;color:var(--color-text-muted);cursor:pointer;font-size:.625rem;font-weight:500;padding:.25rem}
+.tab-btn.active{color:var(--color-primary)}
+.main{flex:1;width:100%;padding:1rem 1rem calc(var(--tab-h) + 1rem);max-width:900px}
+@media(min-width:768px){
+  .sidebar{display:flex}
+  .tab-bar{display:none}
+  .main{margin-left:var(--sidebar-w);padding:1.5rem 2rem 2rem;max-width:none}
+}
+.view{display:none}
+.view.active{display:block}
+.view-header{margin-bottom:1.25rem;display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}
+.view-header-main{flex:1;min-width:0}
+.view-header h1{font-size:1.5rem;font-weight:700;margin-bottom:.25rem}
+.view-header p{color:var(--color-text-muted);font-size:.875rem}
+.notify-wrap{position:relative;flex-shrink:0}
+.notify-btn{position:relative;width:44px;height:44px;min-width:44px;min-height:44px;border:none;background:transparent;border-radius:var(--radius);cursor:pointer;color:var(--color-primary);display:flex;align-items:center;justify-content:center}
+.notify-btn:hover{background:rgba(1,105,111,.1)}
+.notify-btn svg{width:22px;height:22px}
+.notify-badge{position:absolute;top:4px;right:4px;min-width:18px;height:18px;padding:0 4px;border-radius:10px;background:var(--color-error);color:#fff;font-size:.6875rem;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
+.notify-dropdown{position:absolute;right:0;top:48px;width:min(320px,82vw);background:var(--color-surface);border:var(--card-border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,.16);padding:.75rem;z-index:180;display:none}
+.notify-dropdown.open{display:block}
+.notify-dropdown h4{font-size:.875rem;margin-bottom:.5rem}
+.notify-list{list-style:none;max-height:300px;overflow:auto}
+.notify-item{width:100%;text-align:left;border:none;background:transparent;padding:.6rem .55rem;border-radius:8px;cursor:pointer;color:var(--color-text)}
+.notify-item:hover{background:rgba(1,105,111,.08)}
+.notify-item .meta{display:block;font-size:.75rem;color:var(--color-text-muted);margin-top:.15rem}
+.card{background:var(--color-surface);border-radius:var(--radius);padding:1rem 1.25rem;box-shadow:var(--shadow);margin-bottom:1rem;border:var(--card-border)}
+.greeting{font-size:1.25rem;font-weight:700}
+.date-line{color:var(--color-text-muted);font-size:.875rem;margin-top:.25rem}
+.banner-warn{background:#fff3e0;color:#964219;border-radius:var(--radius);padding:.875rem 1rem;margin-bottom:1rem;border:1px solid rgba(150,66,25,.2)}
+.banner-warn strong{display:block;margin-bottom:.5rem}
+.banner-warn-links{display:flex;flex-wrap:wrap;gap:.5rem}
+.banner-warn-links button{background:transparent;border:none;color:#964219;font-weight:700;text-decoration:underline;cursor:pointer;min-height:44px;padding:.25rem .5rem;font-size:.9375rem}
+.med-item.med-low{background:#fff8f0;border-left:4px solid #964219;padding-left:.75rem;margin-left:-.25rem;border-radius:0 var(--radius) var(--radius) 0}
+.progress-ring{display:flex;align-items:center;gap:1rem}
+.progress-bar{flex:1;height:10px;background:var(--color-border);border-radius:5px;overflow:hidden}
+.progress-fill{height:100%;background:var(--color-success);border-radius:5px;transition:width .3s}
+.progress-text{font-weight:700;font-size:1.125rem;color:var(--color-primary);white-space:nowrap}
+.dashboard-summary{display:grid;grid-template-columns:1fr;gap:1rem;margin-bottom:1rem}
+@media(min-width:768px){.dashboard-summary{grid-template-columns:repeat(2,1fr)}}
+.summary-card{background:var(--color-surface);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:1rem 1.25rem;border:var(--card-border)}
+.summary-card h3{font-size:.9375rem;font-weight:700;margin-bottom:.75rem}
+.summary-value{font-size:1.375rem;font-weight:700;color:var(--color-primary);line-height:1.3}
+.summary-meta{font-size:.8125rem;color:var(--color-text-muted);margin-top:.35rem}
+.summary-trend{font-size:.8125rem;margin-top:.5rem;color:var(--color-text-muted)}
+.summary-bar{height:10px;background:var(--color-border);border-radius:5px;overflow:hidden;margin-top:.75rem}
+.summary-bar-fill{height:100%;background:var(--color-success);border-radius:5px;min-width:0;transition:width .3s}
+.summary-empty{font-size:.875rem;color:var(--color-text-muted);text-align:center;padding:1.25rem .5rem;line-height:1.5}
+.summary-empty .emoji{display:block;font-size:1.5rem;margin-bottom:.4rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;min-width:44px;padding:.625rem 1.25rem;border:none;border-radius:var(--radius);font-weight:500;cursor:pointer;transition:background .15s,opacity .15s}
+.btn-primary{background:var(--color-primary);color:#fff}
+.btn-primary:hover{background:var(--color-primary-hover)}
+.btn-secondary{background:transparent;color:var(--color-primary);border:2px solid var(--color-primary)}
+.btn-secondary:hover{background:rgba(1,105,111,.08)}
+.btn-danger{background:var(--color-error);color:#fff}
+.btn-danger:hover{opacity:.9}
+.btn-confirm{background:var(--color-primary);color:#fff}
+.btn-confirm:hover{background:var(--color-primary-hover)}
+.btn-cancel{background:transparent;color:var(--color-text-muted);border:1px solid var(--color-border)}
+.btn-cancel:hover{background:rgba(0,0,0,.04)}
+.btn-ghost{background:transparent;color:var(--color-text-muted);border:1px solid var(--color-border)}
+.btn-ghost:hover{background:var(--color-border)}
+.btn-success{background:var(--color-success);color:#fff}
+.btn-block{width:100%}
+.btn-sm{min-height:44px;padding:.5rem .875rem;font-size:.875rem}
+.badge{display:inline-flex;align-items:center;padding:.2rem .5rem;border-radius:6px;font-size:.75rem;font-weight:500}
+.badge-type{background:var(--color-border);color:var(--color-text-muted)}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:.5rem;border:none;background:transparent;border-radius:var(--radius);cursor:pointer;color:var(--color-text-muted);transition:background .15s,color .15s}
+.icon-btn:hover{background:rgba(0,0,0,.06)}
+.icon-btn.icon-restock:hover{background:rgba(67,122,34,.15);color:var(--color-success)}
+.icon-btn.icon-del:hover{background:rgba(161,44,123,.12);color:var(--color-error)}
+.icon-btn svg{width:22px;height:22px}
+.dose-row{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+.dose-row input[type=number]{flex:1;min-width:80px}
+.dose-quick{display:flex;flex-wrap:wrap;gap:.35rem}
+.dose-quick button{min-width:44px;min-height:44px;padding:0 .5rem;border:1px solid var(--color-border);background:var(--color-surface);border-radius:8px;cursor:pointer;font-size:1rem;font-weight:500;color:var(--color-primary)}
+.dose-quick button:hover{background:rgba(1,105,111,.1)}
+.med-logs-toggle{width:100%;margin-top:.75rem;min-height:44px}
+.med-logs-panel{margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--color-border)}
+.log-tabs{display:flex;gap:.5rem;margin-bottom:.75rem}
+.log-tab{min-height:44px;padding:.5rem 1rem;border:1px solid var(--color-border);background:var(--color-surface);border-radius:var(--radius);cursor:pointer;font-size:.875rem}
+.log-tab.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+.log-history{font-size:.8125rem;color:var(--color-text-muted);list-style:none}
+.log-history li{padding:.35rem 0;border-bottom:1px solid var(--color-border)}
+.theme-switch-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;width:100%;min-height:44px;padding:.625rem .5rem;border:1px solid var(--color-border);border-radius:var(--radius);background:var(--color-surface);cursor:pointer;color:var(--color-primary)}
+.theme-switch-btn svg{width:22px;height:22px}
+.theme-switch-label{font-size:.75rem;font-weight:500;color:var(--color-text-muted);line-height:1.2}
+.modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+.modal-header h2{margin-bottom:0;flex:1}
+.daily-section{margin-top:1rem}
+.daily-section h3{font-size:1rem;margin-bottom:.75rem}
+.walk-list{margin:.75rem 0 0;padding:0;list-style:none}
+.walk-row{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--color-border)}
+.walk-row:last-child{border-bottom:none}
+.walk-row-info{flex:1;font-size:.875rem}
+.walk-row-info strong{display:block;margin-bottom:.2rem}
+.btn-walk-del{flex-shrink:0;min-width:44px;min-height:44px;border:none;background:transparent;color:var(--color-error);cursor:pointer;font-size:1.125rem;border-radius:var(--radius)}
+.btn-walk-del:hover{background:rgba(161,44,123,.1)}
+.duration-quick{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+.duration-quick button{min-width:44px;min-height:44px;padding:0 .65rem;border:1px solid var(--color-border);background:var(--color-surface);border-radius:8px;cursor:pointer;font-size:.875rem;font-weight:500;color:var(--color-primary)}
+.duration-quick button:hover{background:rgba(1,105,111,.1)}
+.meals-section{margin-top:0}
+.meals-header{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.75rem;flex-wrap:wrap}
+.meals-header h3{margin-bottom:0}
+.meal-row{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;padding:.875rem 0;border-bottom:1px solid var(--color-border)}
+.meal-row:last-child{border-bottom:none}
+.meal-row-info{flex:1}
+.meal-row-info strong{display:block;margin-bottom:.25rem}
+.meal-row-info p{font-size:.875rem;color:var(--color-text-muted)}
+.exercise-stat{font-size:.9375rem;font-weight:500;margin-bottom:1rem;padding:.75rem 1rem;background:rgba(1,105,111,.08);border-radius:var(--radius-card);border:var(--card-border)}
+.timeline{list-style:none;margin:0;padding:0}
+.timeline-item{position:relative;padding-left:1.25rem;margin-bottom:1rem}
+.timeline-item::before{content:'';position:absolute;left:4px;top:.5rem;bottom:-1rem;width:2px;background:var(--color-border)}
+.timeline-item:last-child::before{display:none}
+.timeline-item::after{content:'';position:absolute;left:0;top:.65rem;width:10px;height:10px;border-radius:50%;background:var(--color-primary)}
+.timeline-card{background:var(--color-surface);border-radius:var(--radius-card);box-shadow:var(--shadow-card);border:var(--card-border);padding:1rem 1.25rem}
+.timeline-card h3{font-size:1rem;margin-bottom:.35rem}
+.timeline-card .meta{font-size:.8125rem;color:var(--color-text-muted);margin-bottom:.35rem}
+.timeline-card p{font-size:.875rem;color:var(--color-text-muted)}
+.walk-timer-display{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;color:var(--color-primary);margin:.5rem 0}
+.poop-btns{display:flex;gap:.75rem;flex-wrap:wrap}
+.poop-btn{min-width:44px;min-height:44px;padding:.5rem 1rem;border:2px solid var(--color-border);background:var(--color-surface);border-radius:var(--radius);cursor:pointer;font-size:.875rem;font-weight:500}
+.poop-btn.active{border-color:var(--color-primary);background:rgba(1,105,111,.1);color:var(--color-primary)}
+.weight-calc-panel{margin-top:1rem;padding:1rem;background:rgba(1,105,111,.06);border-radius:var(--radius);border:1px solid var(--color-border)}
+.weight-calc-result{font-weight:700;color:var(--color-primary);margin-top:.5rem}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--color-text-muted)}
+.empty .emoji{font-size:2rem;display:block;margin-bottom:.5rem}
+.med-list{list-style:none}
+.med-item{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;padding:1rem 0;border-bottom:1px solid var(--color-border)}
+.med-item:last-child{border-bottom:none}
+.med-item.highlight{animation:highlight 2s ease}
+@keyframes highlight{0%,100%{background:transparent}50%{background:rgba(1,105,111,.15)}}
+.med-info{flex:1;min-width:140px}
+.med-name{font-weight:700}
+.med-meta{font-size:.8125rem;color:var(--color-text-muted)}
+.med-actions{display:flex;flex-wrap:wrap;gap:.5rem}
+.fab-page{position:fixed;bottom:88px;right:24px;z-index:50;width:56px;height:56px;border-radius:50%;background:#01696f;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(1,105,111,.3);display:none;align-items:center;justify-content:center;padding:0}
+.fab-page.visible{display:flex}
+.fab-page .fab-plus{color:#fff;font-size:1.75rem;line-height:1;font-weight:300;pointer-events:none}
+@media(min-width:768px){.fab-page{bottom:32px;right:32px}}
+.slot-group{margin-bottom:1.5rem}
+.slot-title{font-weight:700;font-size:1rem;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.slot-complete{width:100%;margin-bottom:1rem;font-size:1rem}
+.schedule-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--color-border);gap:1rem}
+.schedule-item:last-child{border-bottom:none}
+.toggle-wrap{display:flex;align-items:center;gap:.75rem;min-height:44px}
+.toggle{position:relative;width:52px;height:32px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--color-border);border-radius:16px;cursor:pointer;transition:.2s}
+.toggle-slider::before{content:'';position:absolute;height:26px;width:26px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-slider{background:var(--color-success)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px)}
+.toggle input:disabled+.toggle-slider{opacity:.5;cursor:not-allowed}
+.date-nav{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.date-nav input[type=date]{min-height:44px;padding:.5rem;border:1px solid var(--color-border);border-radius:var(--radius);background:var(--color-surface);color:var(--color-text)}
+.readonly-badge{font-size:.75rem;color:var(--color-warning);font-weight:500}
+.undo-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.75rem 1rem;background:rgba(67,122,34,.15);border-radius:var(--radius);margin-bottom:1rem}
+.chart-wrap{width:100%;margin:1rem 0}
+.chart-wrap canvas{display:block;width:100%;height:200px}
+.tabs-inner{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.tab-inner{min-height:44px;padding:.5rem 1rem;border:1px solid var(--color-border);background:var(--color-surface);border-radius:var(--radius);cursor:pointer;font-weight:500;color:var(--color-text-muted)}
+.tab-inner.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+.log-list{list-style:none}
+.log-item{padding:1rem 0;border-bottom:1px solid var(--color-border)}
+.log-item:last-child{border-bottom:none}
+.log-item h3{font-size:1rem;font-weight:700}
+.log-item .meta{font-size:.8125rem;color:var(--color-text-muted);margin:.25rem 0}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-weight:500;margin-bottom:.35rem;font-size:.875rem}
+.form-group input,.form-group select,.form-group textarea{width:100%;min-height:44px;padding:.625rem .75rem;border:1px solid var(--color-border);border-radius:var(--radius);background:var(--color-surface);color:var(--color-text)}
+.form-group textarea{min-height:88px;resize:vertical}
+.form-hint{font-size:.75rem;color:var(--color-text-muted);margin-top:.25rem}
+.form-row{display:grid;gap:1rem}
+@media(min-width:480px){.form-row{grid-template-columns:1fr 1fr}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--color-surface);border-radius:var(--radius);padding:1.5rem;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,.15);border:var(--card-border)}
+.modal h2{font-size:1.25rem}
+.modal-actions{display:flex;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap}
+.modal-actions .btn{flex:1}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%);background:var(--color-text);color:var(--color-bg);padding:.75rem 1.25rem;border-radius:var(--radius);z-index:300;font-size:.875rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.toast.show{opacity:1}
+.export-grid{display:grid;gap:1rem}
+@media(min-width:480px){.export-grid{grid-template-columns:1fr 1fr}}
+.hidden-input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+</style>
+</head>
+<body>
+<div id="app">
+<aside class="sidebar" aria-label="主選單">
+  <div class="sidebar-brand">🐾 Tricky Care</div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <button type="button" class="theme-switch-btn" id="theme-toggle-btn" aria-label="切換顯示模式"><i data-lucide="sun"></i><span class="theme-switch-label">淺色</span></button>
+  </div>
+</aside>
+<nav class="tab-bar" id="tab-bar" aria-label="底部選單"></nav>
+<main class="main" id="main-content">
+  <section class="view active" id="view-dashboard" data-view="dashboard"></section>
+  <section class="view" id="view-stock" data-view="stock"></section>
+  <section class="view" id="view-schedule" data-view="schedule"></section>
+  <section class="view" id="view-health" data-view="health"></section>
+  <section class="view" id="view-backup" data-view="backup"></section>
+</main>
+</div>
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" id="modal-box"></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<button type="button" class="fab-page" id="fab-dashboard" data-fab-view="dashboard" aria-label="新增"><span class="fab-plus">＋</span></button>
+<button type="button" class="fab-page" id="fab-stock" data-fab-view="stock" aria-label="新增藥物"><span class="fab-plus">＋</span></button>
+<button type="button" class="fab-page" id="fab-schedule" data-fab-view="schedule" aria-label="新增"><span class="fab-plus">＋</span></button>
+<button type="button" class="fab-page" id="fab-health" data-fab-view="health" aria-label="新增記錄"><span class="fab-plus">＋</span></button>
+<button type="button" class="fab-page" id="fab-backup" data-fab-view="backup" aria-label="新增"><span class="fab-plus">＋</span></button>
+<script>
+(function(){
+'use strict';
+const STORAGE_KEY='trickyHealthData';
+const KEY_STOCK_LOGS='tricky-stock-logs';
+const KEY_DOSE_LOGS='tricky-dose-logs';
+const KEY_DAILY_NOTES='tricky-daily-notes';
+const KEY_FEED_TEMPLATE='tricky-feed-template';
+const KEY_OWNER_WEIGHT='tricky-owner-weight';
+const DEFAULT_FEED_TEMPLATE=[
+  {name:'第1餐',note:'35g 鮮食 + 35g 罐頭'},
+  {name:'第2餐',note:'45g 鮮食 + 45g 罐頭'},
+  {name:'第3餐',note:'35g 鮮食 + 40g 罐頭'},
+  {name:'第4餐',note:'35g 鮮食 + 40g 罐頭'}
+];
+const WALK_QUICK_MINS=[15,30,45,60];
+const KEY_THEME_MODE='tricky-theme-mode';
+const THEME_CYCLE=['light','dark','system'];
+const THEME_UI={light:{icon:'sun',label:'淺色'},dark:{icon:'moon',label:'深色'},system:{icon:'monitor',label:'跟隨系統'}};
+let themeMediaQuery=null;
+const NAV=[
+  {id:'dashboard',icon:'layout-dashboard',label:'首頁'},
+  {id:'stock',icon:'pill',label:'庫存'},
+  {id:'schedule',icon:'calendar-days',label:'日程'},
+  {id:'health',icon:'heart-pulse',label:'健康'},
+  {id:'backup',icon:'hard-drive',label:'備份'}
+];
+const SLOT_LABELS={morning:'早上',noon:'中午',evening:'晚上'};
+const ABNORMAL_TYPES=['嘔吐','腹瀉','食慾不振','抽搐','其他'];
+const DOSE_FRACS=[{v:0.25,l:'¼'},{v:0.333,l:'⅓'},{v:0.5,l:'½'},{v:1,l:'1'},{v:2,l:'2'}];
+const POOP_LABELS={normal:'✅ 正常',soft:'💧 稀爛',none:'❌ 未去'};
+let state=loadState();
+let currentView='dashboard';
+let scheduleDate=todayStr();
+let scheduleUnlocked={};
+let healthTab='weight';
+let undoTimer=null;
+let highlightMedId=null;
+let expandedMedLogs={};
+let medLogTab={};
+let walkTimerInterval=null;
+let walkTimerStart=null;
+let notifyOutsideHandler=null;
+
+function defaultState(){
+  return{theme:'auto',medications:[],schedules:{},completions:{},weightLogs:[],abnormalLogs:[],medicalLogs:[]};
+}
+function loadState(){
+  try{
+    const r=localStorage.getItem(STORAGE_KEY);
+    if(r)return{...defaultState(),...JSON.parse(r)};
+  }catch(e){}
+  return defaultState();
+}
+function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
+function getStockLogs(){try{const r=localStorage.getItem(KEY_STOCK_LOGS);return r?JSON.parse(r):[];}catch(e){return[];}}
+function saveStockLogs(a){localStorage.setItem(KEY_STOCK_LOGS,JSON.stringify(a));}
+function getDoseLogs(){try{const r=localStorage.getItem(KEY_DOSE_LOGS);return r?JSON.parse(r):[];}catch(e){return[];}}
+function saveDoseLogs(a){localStorage.setItem(KEY_DOSE_LOGS,JSON.stringify(a));}
+function getDailyNotes(){try{const r=localStorage.getItem(KEY_DAILY_NOTES);return r?JSON.parse(r):{};}catch(e){return{};}}
+function saveDailyNotes(o){localStorage.setItem(KEY_DAILY_NOTES,JSON.stringify(o));}
+function getOwnerWeight(){return localStorage.getItem(KEY_OWNER_WEIGHT)||'';}
+function setOwnerWeight(v){if(v)localStorage.setItem(KEY_OWNER_WEIGHT,String(v));else localStorage.removeItem(KEY_OWNER_WEIGHT);}
+function initExtraKeys(){
+  if(!localStorage.getItem(KEY_STOCK_LOGS))saveStockLogs([]);
+  if(!localStorage.getItem(KEY_DOSE_LOGS))saveDoseLogs([]);
+  if(!localStorage.getItem(KEY_DAILY_NOTES))saveDailyNotes({});
+  if(!localStorage.getItem(KEY_FEED_TEMPLATE))saveFeedTemplate(JSON.parse(JSON.stringify(DEFAULT_FEED_TEMPLATE)));
+}
+function getFeedTemplate(){
+  try{
+    const r=localStorage.getItem(KEY_FEED_TEMPLATE);
+    if(r){const p=JSON.parse(r);if(Array.isArray(p)&&p.length)return p;}
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_FEED_TEMPLATE));
+}
+function saveFeedTemplate(t){localStorage.setItem(KEY_FEED_TEMPLATE,JSON.stringify(t));}
+function mutateDailyDay(date){
+  const all=getDailyNotes();
+  if(!all[date])all[date]={walks:[],poops:[]};
+  return{all,day:all[date]};
+}
+function isoToHM(isoOrTs){
+  const d=new Date(isoOrTs);
+  if(isNaN(d.getTime()))return nowTimeStr();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function normalizeWalk(w){
+  if(!w||typeof w!=='object')return{id:Date.now(),startTime:nowTimeStr(),durationMinutes:0,note:''};
+  let st=w.startTime;
+  if(st&&String(st).indexOf('T')>=0)st=isoToHM(st);
+  else if(!st||!/^\d{1,2}:\d{2}$/.test(String(st)))st=nowTimeStr();
+  return{
+    id:w.id!=null?w.id:Date.now(),
+    startTime:st,
+    durationMinutes:Number(w.durationMinutes)||0,
+    note:w.note!=null?String(w.note):''
+  };
+}
+function walkMinutesFromWalk(w){return Number(normalizeWalk(w).durationMinutes)||0;}
+function getWalkTotalMinutesFromWalks(walks){
+  return(walks||[]).reduce((s,w)=>s+walkMinutesFromWalk(w),0);
+}
+function ensureMealsForDate(date){
+  const{all,day}=mutateDailyDay(date);
+  if(!Array.isArray(day.meals)||!day.meals.length){
+    day.meals=JSON.parse(JSON.stringify(getFeedTemplate()));
+    all[date]=day;
+    saveDailyNotes(all);
+  }
+  return day.meals;
+}
+function getPast7WalkTotal(){
+  let t=0;
+  getLast7DateStrings().forEach(d=>{t+=getWalkTotalMinutesFromWalks(readDailyNoteDay(d).walks);});
+  return t;
+}
+function getAllWalkTimeline(){
+  const all=getDailyNotes();
+  const entries=[];
+  Object.keys(all).forEach(date=>{
+    (all[date].walks||[]).forEach((w,idx)=>{
+      entries.push({date,idx,walk:normalizeWalk(w)});
+    });
+  });
+  entries.sort((a,b)=>{
+    const ka=a.date+' '+a.walk.startTime;
+    const kb=b.date+' '+b.walk.startTime;
+    return kb.localeCompare(ka);
+  });
+  return entries;
+}
+const DOSE_EPS=0.005;
+function parseDoseValue(val){
+  const v=parseFloat(val);
+  return isNaN(v)?0:v;
+}
+function formatDose(n){
+  const v=parseFloat(n);
+  if(isNaN(v))return String(n==null?'':n);
+  if(Math.abs(v-0.25)<DOSE_EPS)return'¼';
+  if(Math.abs(v-0.333)<DOSE_EPS||Math.abs(v-1/3)<DOSE_EPS)return'⅓';
+  if(Math.abs(v-0.5)<DOSE_EPS)return'½';
+  const s=v.toFixed(2);
+  return s.replace(/\.?0+$/,'')||'0';
+}
+function doseQuickHtml(inputName){
+  return'<div class="dose-quick">'+DOSE_FRACS.map(f=>'<button type="button" class="dose-pick" data-target="'+inputName+'" data-val="'+f.v+'">'+f.l+'</button>').join('')+'</div>';
+}
+function plainNumberFieldHtml(label,name,value,required,minVal){
+  const req=required?' required':'';
+  const min=minVal!=null?' min="'+minVal+'"':' min="0"';
+  const val=value!=null&&value!==''?' value="'+value+'"':'';
+  return'<div class="form-group"><label>'+label+'</label><input type="number" name="'+name+'"'+req+min+' step="0.001"'+val+'></div>';
+}
+function dosePerTimeFieldHtml(label,name,value,required){
+  const req=required?' required':'';
+  const val=value!=null&&value!==''?' value="'+value+'"':'';
+  return'<div class="form-group"><label>'+label+'</label><div class="dose-row"><input type="number" name="'+name+'"'+req+' min="0.01" step="0.001"'+val+'>'+doseQuickHtml(name)+'</div></div>';
+}
+function bindDoseQuick(root){
+  (root||document).querySelectorAll('.dose-pick').forEach(btn=>{
+    btn.onclick=()=>{
+      const scope=root||document;
+      const inp=scope.querySelector('[name="'+btn.dataset.target+'"]')||scope.querySelector('[data-dose-input="'+btn.dataset.target+'"]');
+      if(inp){inp.value=btn.dataset.val;inp.dispatchEvent(new Event('input',{bubbles:true}));}
+    };
+  });
+}
+function deductMedStock(med,dose){
+  const d=parseDoseValue(dose);
+  med.stock=med.stock-d;
+  if(med.stock<0)med.stock=0;
+}
+function restoreMedStock(med,dose){
+  med.stock+=parseDoseValue(dose);
+}
+function nowTimeStr(){
+  const d=new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function addStockLog(medId,medName,qty){
+  const logs=getStockLogs();
+  logs.unshift({id:Date.now(),medicineId:medId,medicineName:medName,qty,date:todayStr(),time:nowTimeStr()});
+  saveStockLogs(logs);
+}
+function addDoseLog(medId,medName,qty,date,session){
+  const logs=getDoseLogs();
+  const entry={id:Date.now(),medicineId:medId,medicineName:medName,qty,date,time:nowTimeStr(),session};
+  logs.unshift(entry);
+  saveDoseLogs(logs);
+  return entry.id;
+}
+function removeDoseLogsByIds(ids){
+  if(!ids||!ids.length)return;
+  const set=new Set(ids);
+  saveDoseLogs(getDoseLogs().filter(l=>!set.has(l.id)));
+}
+function removeLatestDoseLog(medId,date){
+  const logs=getDoseLogs();
+  const idx=logs.findIndex(l=>l.medicineId===medId&&l.date===date);
+  if(idx>=0){logs.splice(idx,1);saveDoseLogs(logs);}
+}
+function icons(){if(typeof lucide!=='undefined'&&lucide.createIcons)lucide.createIcons();}
+function viewHeaderHtml(title,subtitle){
+  return'<div class="view-header"><div class="view-header-main"><h1>'+esc(title)+'</h1><p>'+esc(subtitle)+'</p></div>'+renderNotifyCenterHtml()+'</div>';
+}
+function renderNotifyCenterHtml(){
+  const lows=getLowStockMeds();
+  const count=lows.length;
+  const badge=count?'<span class="notify-badge">'+count+'</span>':'';
+  const list=count?'<ul class="notify-list">'+lows.map(m=>'<li><button type="button" class="notify-item" data-notify-med="'+m.id+'">'+esc(m.name)+'<span class="meta">現有 '+formatDose(m.stock)+' '+esc(m.unit)+' ｜ 警示 ≤ '+formatDose(m.lowStockThreshold)+' '+esc(m.unit)+'</span></button></li>').join('')+'</ul>':'<p class="form-hint">目前未有低庫存通知</p>';
+  return'<div class="notify-wrap"><button type="button" class="notify-btn" id="notify-btn" aria-label="通知中心"><i data-lucide="bell"></i>'+badge+'</button><div class="notify-dropdown" id="notify-dropdown"><h4>低庫存通知</h4>'+list+'</div></div>';
+}
+function closeNotifyDropdown(){
+  const dd=document.getElementById('notify-dropdown');
+  if(dd)dd.classList.remove('open');
+}
+function bindNotifyCenter(){
+  const btn=document.getElementById('notify-btn');
+  const dd=document.getElementById('notify-dropdown');
+  if(!btn||!dd)return;
+  btn.onclick=(e)=>{
+    e.stopPropagation();
+    dd.classList.toggle('open');
+  };
+  dd.onclick=(e)=>{
+    const item=e.target.closest('[data-notify-med]');
+    if(item){
+      const medId=item.dataset.notifyMed;
+      closeNotifyDropdown();
+      switchView('stock',{highlightMed:medId});
+    }
+  };
+  if(notifyOutsideHandler)document.removeEventListener('click',notifyOutsideHandler);
+  notifyOutsideHandler=(e)=>{
+    if(!dd.classList.contains('open'))return;
+    const wrap=e.target.closest('.notify-wrap');
+    if(!wrap)closeNotifyDropdown();
+  };
+  document.addEventListener('click',notifyOutsideHandler);
+}
+function getFullBackup(){
+  return{version:2,state,stockLogs:getStockLogs(),doseLogs:getDoseLogs(),dailyNotes:getDailyNotes(),feedTemplate:getFeedTemplate(),ownerWeight:getOwnerWeight()};
+}
+function restoreFullBackup(data){
+  if(data.version===2||data.state){
+    state={...defaultState(),...(data.state||{})};
+    saveStockLogs(data.stockLogs||[]);
+    saveDoseLogs(data.doseLogs||[]);
+    saveDailyNotes(data.dailyNotes||{});
+    if(data.feedTemplate)saveFeedTemplate(data.feedTemplate);
+    if(data.ownerWeight!=null)setOwnerWeight(data.ownerWeight);
+  }else{
+    state={...defaultState(),...data};
+    saveStockLogs([]);
+    saveDoseLogs([]);
+    saveDailyNotes({});
+  }
+}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function parseDate(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function isPastDate(s){return s<todayStr();}
+function isReadonlyScheduleDate(s){return isPastDate(s)&&!scheduleUnlocked[s];}
+function timeToMinutes(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+function getSlot(t){
+  const mins=timeToMinutes(t);
+  if(mins>=360&&mins<720)return'morning';
+  if(mins>=720&&mins<1080)return'noon';
+  return'evening';
+}
+function completionKey(medId,time){return medId+'_'+time;}
+function getCompletionsForDate(date){
+  if(!state.completions[date])state.completions[date]={items:{}};
+  return state.completions[date];
+}
+function getAllScheduleItems(){
+  const items=[];
+  state.medications.forEach(med=>{
+    const slots=state.schedules[med.id]||[];
+    slots.forEach(s=>items.push({med,time:s.time,dose:s.dose||med.dosePerTime,slot:getSlot(s.time)}));
+  });
+  return items;
+}
+function readCompletionsItems(date){
+  const comp=state.completions[date];
+  return comp&&comp.items?comp.items:{};
+}
+function getTodayProgress(){
+  const date=todayStr();
+  const items=readCompletionsItems(date);
+  const schedule=getAllScheduleItems();
+  let done=0;
+  schedule.forEach(it=>{
+    if(items[completionKey(it.med.id,it.time)])done++;
+  });
+  return{done,total:schedule.length};
+}
+function getLast7DateStrings(){
+  const out=[];
+  for(let i=6;i>=0;i--)out.push(addDays(todayStr(),-i));
+  return out;
+}
+function getWeeklyMedSummary(){
+  const dates=getLast7DateStrings();
+  const perDay=getAllScheduleItems().length;
+  if(!perDay)return null;
+  let done=0;
+  const total=perDay*dates.length;
+  dates.forEach(date=>{
+    const items=readCompletionsItems(date);
+    Object.keys(items).forEach(k=>{if(items[k])done++;});
+  });
+  const pct=total?Math.min(100,Math.round(done/total*100)):0;
+  return{done,total,pct};
+}
+function getLatestWeightSummary(){
+  const logs=(state.weightLogs||[]).filter(w=>w&&w.date&&typeof w.kg==='number'&&!isNaN(w.kg));
+  if(!logs.length)return null;
+  const sorted=[...logs].sort((a,b)=>{
+    const c=b.date.localeCompare(a.date);
+    return c!==0?c:String(b.id||'').localeCompare(String(a.id||''));
+  });
+  const latest=sorted[0];
+  let trend='';
+  if(sorted.length>=2){
+    const prev=sorted[1];
+    const diff=latest.kg-prev.kg;
+    const absDiff=Math.abs(diff);
+    const rounded=Math.round(absDiff*100)/100;
+    if(absDiff<0.005)trend='→ 體重持平';
+    else if(diff>0)trend='↑ 增加 '+rounded+'kg';
+    else trend='↓ 減少 '+rounded+'kg';
+  }
+  return{kg:latest.kg,date:latest.date,trend};
+}
+function readDailyNoteDay(date){
+  const all=getDailyNotes();
+  const d=all[date];
+  if(!d||typeof d!=='object')return{walks:[],poops:[]};
+  return{walks:Array.isArray(d.walks)?d.walks:[],poops:Array.isArray(d.poops)?d.poops:[]};
+}
+function getTodayLifeSummary(){
+  const day=readDailyNoteDay(todayStr());
+  const walkMin=day.walks.reduce((s,w)=>{const m=Number(w&&w.durationMinutes);return s+(isNaN(m)?0:m);},0);
+  const lastPoop=day.poops.length?day.poops[day.poops.length-1]:null;
+  const hasWalk=walkMin>0;
+  const hasPoop=!!(lastPoop&&lastPoop.status);
+  if(!hasWalk&&!hasPoop)return null;
+  return{walkMin,lastPoop:hasPoop?lastPoop:null};
+}
+function renderSummaryWeightCard(){
+  const w=getLatestWeightSummary();
+  if(!w)return'<div class="summary-card"><h3>⚖️ 最新體重</h3><div class="summary-empty"><span class="emoji">🐾</span>還未記錄體重，去健康頁為 Tricky 磅身啦</div></div>';
+  const trendHtml=w.trend?'<p class="summary-trend">'+esc(w.trend)+'</p>':'';
+  return'<div class="summary-card"><h3>⚖️ 最新體重</h3><p class="summary-value">'+w.kg+' kg</p><p class="summary-meta">'+esc(w.date)+'</p>'+trendHtml+'</div>';
+}
+function renderSummaryMedCard(){
+  const w=getWeeklyMedSummary();
+  if(w===null)return'<div class="summary-card"><h3>📊 本週服藥達成率</h3><div class="summary-empty"><span class="emoji">🐾</span>尚未設定服藥日程，完成設定後即可睇到達成率</div></div>';
+  const pct=w.pct;
+  return'<div class="summary-card"><h3>📊 本週服藥達成率</h3><p class="summary-value">'+pct+'%</p><p class="summary-meta">過去 7 日完成 '+w.done+' / '+w.total+' 次</p><div class="summary-bar" role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100"><div class="summary-bar-fill" style="width:'+pct+'%"></div></div></div>';
+}
+function renderSummaryLifeCard(){
+  const life=getTodayLifeSummary();
+  if(!life)return'<div class="summary-card"><h3>🐾 今日生活小結</h3><div class="summary-empty"><span class="emoji">🐾</span>今日尚未記錄散步或排便，去日程頁記低 Tricky 嘅生活點滴啦</div></div>';
+  const parts=[];
+  if(life.walkMin>0)parts.push('散步 '+life.walkMin+' 分鐘');
+  if(life.lastPoop){
+    const label=POOP_LABELS[life.lastPoop.status]||life.lastPoop.status;
+    const t=life.lastPoop.time?'（'+esc(life.lastPoop.time)+'）':'';
+    parts.push('排便 '+label+t);
+  }
+  return'<div class="summary-card"><h3>🐾 今日生活小結</h3><p class="summary-value" style="font-size:1rem">'+parts.join(' · ')+'</p></div>';
+}
+function renderDashboardSummaries(){
+  return'<div class="dashboard-summary">'+renderSummaryWeightCard()+renderSummaryMedCard()+renderSummaryLifeCard()+'</div>';
+}
+function getLowStockMeds(){return state.medications.filter(m=>m.stock<=m.lowStockThreshold);}
+function greeting(){
+  const h=new Date().getHours();
+  if(h<12)return'早晨好';
+  if(h<18)return'午安';
+  return'晚安';
+}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function openModal(title,body,actions){
+  const box=document.getElementById('modal-box');
+  box.innerHTML='<div class="modal-header"><h2>'+esc(title)+'</h2><button type="button" class="icon-btn modal-close-x" aria-label="關閉"><i data-lucide="x"></i></button></div>'+body+'<div class="modal-actions">'+actions+'</div>';
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('modal-overlay').setAttribute('aria-hidden','false');
+  box.querySelector('.modal-close-x').onclick=closeModal;
+  icons();
+}
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('modal-overlay').setAttribute('aria-hidden','true');
+}
+function confirmDialog(title,msg,onOk){
+  openModal(title,'<p>'+esc(msg)+'</p>',
+    '<button type="button" class="btn btn-cancel" data-modal-cancel>取消</button><button type="button" class="btn btn-confirm" data-modal-ok>確認</button>');
+  document.querySelector('[data-modal-cancel]').onclick=closeModal;
+  document.querySelector('[data-modal-ok]').onclick=()=>{closeModal();onOk();};
+}
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+
+function getThemeMode(){
+  const saved=localStorage.getItem(KEY_THEME_MODE);
+  if(saved==='light'||saved==='dark'||saved==='system')return saved;
+  if(state.theme==='light'||state.theme==='dark')return state.theme;
+  if(state.theme==='auto')return'system';
+  return'system';
+}
+function setThemeMode(mode){
+  localStorage.setItem(KEY_THEME_MODE,mode);
+}
+function applyTheme(){
+  const mode=getThemeMode();
+  if(mode==='light')document.documentElement.setAttribute('data-theme','light');
+  else if(mode==='dark')document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+  updateThemeToggleUI(mode);
+}
+function updateThemeToggleUI(mode){
+  const ui=THEME_UI[mode]||THEME_UI.system;
+  document.querySelectorAll('.theme-switch-btn').forEach(btn=>{
+    btn.innerHTML='<i data-lucide="'+ui.icon+'"></i><span class="theme-switch-label">'+ui.label+'</span>';
+  });
+  icons();
+}
+function cycleTheme(){
+  const mode=getThemeMode();
+  const i=THEME_CYCLE.indexOf(mode);
+  const next=THEME_CYCLE[(i+1)%THEME_CYCLE.length];
+  setThemeMode(next);
+  applyTheme();
+  showToast(THEME_UI[next].label);
+}
+function initThemeListener(){
+  themeMediaQuery=window.matchMedia('(prefers-color-scheme: dark)');
+  const onChange=()=>{if(getThemeMode()==='system')applyTheme();};
+  if(themeMediaQuery.addEventListener)themeMediaQuery.addEventListener('change',onChange);
+  else if(themeMediaQuery.addListener)themeMediaQuery.addListener(onChange);
+}
+function initThemeFromStorage(){
+  if(!localStorage.getItem(KEY_THEME_MODE)){
+    if(state.theme==='light'||state.theme==='dark')setThemeMode(state.theme);
+    else if(state.theme==='auto')setThemeMode('system');
+    else setThemeMode('system');
+  }
+}
+document.getElementById('theme-toggle-btn').onclick=cycleTheme;
+
+function updateFab(){
+  document.querySelectorAll('.fab-page').forEach(fab=>{
+    const show=fab.dataset.fabView===currentView&&fabHasAction(currentView);
+    fab.classList.toggle('visible',show);
+  });
+}
+function fabHasAction(view){
+  if(view==='stock'||view==='health')return true;
+  return false;
+}
+function fabActionForView(view){
+  if(view==='stock')openMedForm(null);
+  else if(view==='health'){
+    if(healthTab==='weight')openWeightForm(null);
+    else if(healthTab==='abnormal')openAbnormalForm(null);
+    else openMedicalForm(null);
+  }
+}
+document.querySelectorAll('.fab-page').forEach(fab=>{
+  fab.onclick=()=>fabActionForView(fab.dataset.fabView);
+});
+
+function buildNav(){
+  const sn=document.getElementById('sidebar-nav');
+  const tb=document.getElementById('tab-bar');
+  sn.innerHTML='';tb.innerHTML='';
+  NAV.forEach(n=>{
+    const sb=document.createElement('button');
+    sb.type='button';sb.className='nav-btn'+(currentView===n.id?' active':'');
+    sb.dataset.view=n.id;
+    sb.innerHTML='<span class="icon"><i data-lucide="'+n.icon+'"></i></span><span>'+n.label+'</span>';
+    sb.onclick=()=>switchView(n.id);
+    sn.appendChild(sb);
+    const tb2=document.createElement('button');
+    tb2.type='button';tb2.className='tab-btn'+(currentView===n.id?' active':'');
+    tb2.dataset.view=n.id;
+    tb2.innerHTML='<span class="icon"><i data-lucide="'+n.icon+'"></i></span><span>'+n.label+'</span>';
+    tb2.onclick=()=>switchView(n.id);
+    tb.appendChild(tb2);
+  });
+}
+function switchView(id,opts){
+  currentView=id;
+  if(opts&&opts.highlightMed)highlightMedId=opts.highlightMed;
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===id));
+  buildNav();
+  render();
+  updateFab();
+  icons();
+}
+function render(){
+  if(walkTimerInterval&&currentView!=='schedule'){clearInterval(walkTimerInterval);walkTimerInterval=null;}
+  if(currentView==='dashboard')renderDashboard();
+  else if(currentView==='stock')renderStock();
+  else if(currentView==='schedule')renderSchedule();
+  else if(currentView==='health')renderHealth();
+  else if(currentView==='backup')renderBackup();
+  updateFab();
+  icons();
+  bindNotifyCenter();
+}
+
+function renderDashboard(){
+  const el=document.getElementById('view-dashboard');
+  const low=getLowStockMeds();
+  const prog=getTodayProgress();
+  const pct=prog.total?Math.round(prog.done/prog.total*100):0;
+  const d=new Date();
+  const dateStr=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 '+['日','一','二','三','四','五','六'][d.getDay()];
+  const banner=low.length?'<div class="banner-warn" id="banner-warn"><strong>⚠️ 庫存不足</strong><div class="banner-warn-links">'+
+    low.map(m=>'<button type="button" data-goto-med="'+m.id+'">'+esc(m.name)+'（'+formatDose(m.stock)+' '+esc(m.unit)+'）</button>').join('')+
+    '</div></div>':'<div class="banner-warn" id="banner-warn" style="display:none"></div>';
+  el.innerHTML=banner+
+    '<div class="view-header"><div class="view-header-main"><h1>首頁</h1><p class="date-line">'+dateStr+'</p></div>'+renderNotifyCenterHtml()+'</div>'+
+    '<div class="card"><p class="greeting">Tricky，'+greeting()+' 🐾</p></div>'+
+    '<div class="card"><h2 style="font-size:1rem;margin-bottom:.75rem">今日服藥進度</h2>'+
+    '<div class="progress-ring"><span class="progress-text">今日 '+prog.done+'/'+prog.total+' 完成</span>'+
+    '<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div></div>'+
+    renderDashboardSummaries();
+  el.querySelectorAll('[data-goto-med]').forEach(b=>b.onclick=()=>switchView('stock',{highlightMed:b.dataset.gotoMed}));
+}
+
+function renderMedLogsPanel(medId){
+  const stockLogs=getStockLogs().filter(l=>l.medicineId===medId).slice(0,5);
+  if(!stockLogs.length)return'<p style="font-size:.875rem;color:var(--color-text-muted)">暫無入貨紀錄</p>';
+  return'<ul class="log-history">'+stockLogs.map(l=>'<li>'+l.date+' '+l.time+' · +'+formatDose(l.qty)+'</li>').join('')+'</ul>';
+}
+function renderStock(){
+  const el=document.getElementById('view-stock');
+  const meds=state.medications;
+  let list='';
+  if(!meds.length){
+    list='<div class="empty"><span class="emoji">🐾</span>還未有藥物記錄，點擊右下角 ＋ 新增 Tricky 的第一隻藥</div>';
+  }else{
+    list='<ul class="med-list">'+meds.map(m=>{
+      const low=m.stock<=m.lowStockThreshold;
+      const hl=highlightMedId===m.id?' highlight':'';
+      const lowCls=low?' med-low':'';
+      const expanded=expandedMedLogs[m.id];
+      return'<li class="med-item'+hl+lowCls+'" data-med-id="'+m.id+'" id="med-'+m.id+'" style="flex-direction:column;align-items:stretch">'+
+        '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;width:100%">'+
+        '<div class="med-info"><div class="med-name">'+esc(m.name)+'</div>'+
+        '<div class="med-meta">'+esc(m.type==='drug'?'藥物':'保健品')+' · 庫存 '+formatDose(m.stock)+' '+esc(m.unit)+
+        ' · 每次 '+formatDose(m.dosePerTime)+' '+esc(m.unit)+' · 警示 ≤'+formatDose(m.lowStockThreshold)+'</div></div>'+
+        '<div class="med-actions">'+
+        '<button type="button" class="icon-btn icon-restock" data-restock="'+m.id+'" aria-label="入貨"><i data-lucide="package-plus"></i></button>'+
+        '<button type="button" class="icon-btn" data-edit="'+m.id+'" aria-label="編輯"><i data-lucide="pencil"></i></button>'+
+        '<button type="button" class="icon-btn icon-del" data-del="'+m.id+'" aria-label="刪除"><i data-lucide="trash-2"></i></button></div></div>'+
+        '<button type="button" class="btn btn-ghost btn-sm med-logs-toggle" data-toggle-logs="'+m.id+'">📋 入貨紀錄</button>'+
+        (expanded?'<div class="med-logs-panel">'+renderMedLogsPanel(m.id)+'</div>':'')+
+        '</li>';
+    }).join('')+'</ul>';
+  }
+  el.innerHTML=viewHeaderHtml('藥物庫存','管理 Tricky 的藥物同保健品')+
+    '<div class="card">'+list+'</div>';
+  el.querySelectorAll('[data-restock]').forEach(b=>b.onclick=()=>openRestock(b.dataset.restock));
+  el.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openMedForm(b.dataset.edit));
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>deleteMed(b.dataset.del));
+  el.querySelectorAll('[data-toggle-logs]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.toggleLogs;
+    expandedMedLogs[id]=!expandedMedLogs[id];
+    if(expandedMedLogs[id]&&!medLogTab[id])medLogTab[id]='stock';
+    renderStock();
+  });
+  if(highlightMedId){
+    const node=document.getElementById('med-'+highlightMedId);
+    if(node){node.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>{highlightMedId=null;},2500);}
+  }
+}
+
+function openMedForm(id){
+  const m=id?state.medications.find(x=>x.id===id):null;
+  const body='<form id="med-form">'+
+    '<div class="form-group"><label>名稱 *</label><input name="name" required maxlength="80" value="'+(m?esc(m.name):'')+'"></div>'+
+    '<div class="form-row"><div class="form-group"><label>類型 *</label><select name="type" required><option value="drug"'+(m&&m.type==='drug'?' selected':'')+'>藥物</option><option value="supplement"'+(m&&m.type==='supplement'?' selected':'')+'>保健品</option></select></div>'+
+    '<div class="form-group"><label>單位 *</label><select name="unit" required><option value="粒"'+(m&&m.unit==='粒'?' selected':'')+'>粒</option><option value="ml"'+(m&&m.unit==='ml'?' selected':'')+'>ml</option><option value="包"'+(m&&m.unit==='包'?' selected':'')+'>包</option></select></div></div>'+
+    plainNumberFieldHtml('庫存數量 *','stock',m?m.stock:0,true,0)+
+    dosePerTimeFieldHtml('每次劑量 *','dosePerTime',m?m.dosePerTime:1,true)+
+    plainNumberFieldHtml('低庫存警示閾值 *','lowStockThreshold',m?m.lowStockThreshold:5,true,0)+
+    '</form>';
+  openModal(id?'編輯藥物':'新增藥物',body,
+    '<button type="button" class="btn btn-cancel" data-modal-cancel>取消</button><button type="button" class="btn btn-confirm" data-modal-save>儲存</button>');
+  bindDoseQuick(document.getElementById('med-form'));
+  document.querySelector('[data-modal-cancel]').onclick=closeModal;
+  document.querySelector('[data-modal-save]').onclick=()=>{
+    const f=document.getElementById('med-form');
+    if(!f.reportValidity())return;
+    const fd=new FormData(f);
+    const data={name:fd.get('name').trim(),type:fd.get('type'),unit:fd.get('unit'),
+      stock:parseDoseValue(fd.get('stock')),dosePerTime:parseDoseValue(fd.get('dosePerTime')),
+      lowStockThreshold:parseDoseValue(fd.get('lowStockThreshold'))};
+    if(!data.name){showToast('請輸入名稱');return;}
+    if(id){
+      const idx=state.medications.findIndex(x=>x.id===id);
+      if(idx>=0)state.medications[idx]={...state.medications[idx],...data};
+    }else{
+      const nid=uid();
+      state.medications.push({id:nid,...data});
+      state.schedules[nid]=state.schedules[nid]||[];
+    }
+    saveState();closeModal();render();
+    showToast(id?'已更新':'已新增');
+  };
+}
+
+function openRestock(id){
+  const m=state.medications.find(x=>x.id===id);
+  if(!m)return;
+  openModal('入貨 — '+m.name,
+    '<form id="restock-form">'+plainNumberFieldHtml('補充數量 *','qty','',true,0.01)+'</form>',
+    '<button type="button" class="btn btn-cancel" data-modal-cancel>取消</button><button type="button" class="btn btn-confirm" data-modal-save>確認入貨</button>');
+  document.querySelector('[data-modal-cancel]').onclick=closeModal;
+  document.querySelector('[data-modal-save]').onclick=()=>{
+    const f=document.getElementById('restock-form');
+    if(!f.reportValidity())return;
+    const qty=parseDoseValue(new FormData(f).get('qty'));
+    m.stock+=qty;
+    addStockLog(m.id,m.name,qty);
+    saveState();closeModal();render();
+    showToast('已入貨 +'+formatDose(qty)+' '+m.unit);
+  };
+}
+
+function deleteMed(id){
+  const m=state.medications.find(x=>x.id===id);
+  if(!m)return;
+  confirmDialog('刪除藥物','確定要刪除「'+m.name+'」？此操作無法復原。',()=>{
+    state.medications=state.medications.filter(x=>x.id!==id);
+    delete state.schedules[id];
+    Object.keys(state.completions).forEach(d=>{
+      Object.keys(state.completions[d].items||{}).forEach(k=>{
+        if(k.startsWith(id+'_'))delete state.completions[d].items[k];
+      });
+    });
+    saveState();renderStock();showToast('已刪除');
+  });
+}
+
+let pendingUndo=null;
+function renderSchedule(){
+  const el=document.getElementById('view-schedule');
+  const date=scheduleDate;
+  const readonly=isReadonlyScheduleDate(date);
+  const comp=getCompletionsForDate(date);
+  const items=getAllScheduleItems();
+  const bySlot={morning:[],noon:[],evening:[]};
+  items.forEach(it=>bySlot[it.slot].push(it));
+  bySlot.morning.sort((a,b)=>timeToMinutes(a.time)-timeToMinutes(b.time));
+  bySlot.noon.sort((a,b)=>timeToMinutes(a.time)-timeToMinutes(b.time));
+  bySlot.evening.sort((a,b)=>timeToMinutes(a.time)-timeToMinutes(b.time));
+
+  let undoBar='';
+  if(pendingUndo&&pendingUndo.date===date){
+    undoBar='<div class="undo-bar"><span>已標記「'+SLOT_LABELS[pendingUndo.slot]+'」完成</span><button type="button" class="btn btn-sm btn-secondary" id="btn-undo">↩ 撤銷</button></div>';
+  }
+
+  let slotsHtml='';
+  ['morning','noon','evening'].forEach(slot=>{
+    const list=bySlot[slot];
+    if(!list.length&&!items.length)return;
+    const allDone=list.length>0&&list.every(it=>comp.items[completionKey(it.med.id,it.time)]);
+    let inner='';
+    if(list.length){
+      inner=list.map(it=>{
+        const key=completionKey(it.med.id,it.time);
+        const done=!!comp.items[key];
+        const dose=it.dose||it.med.dosePerTime;
+        return'<div class="schedule-item"><div><strong>'+esc(it.med.name)+'</strong><br><span style="font-size:.8125rem;color:var(--color-text-muted)">'+it.time+' · '+formatDose(dose)+' '+esc(it.med.unit)+'</span></div>'+
+          '<label class="toggle-wrap"><span class="toggle"><input type="checkbox" data-toggle-key="'+key+'" data-med="'+it.med.id+'" data-time="'+it.time+'" data-dose="'+dose+'"'+(done?' checked':'')+(readonly?' disabled':'')+'><span class="toggle-slider"></span></span></label></div>';
+      }).join('');
+    }else{
+      inner='<p style="color:var(--color-text-muted);font-size:.875rem;padding:.5rem 0">此時段暫無服藥安排</p>';
+    }
+    const btnDisabled=readonly||!list.length||allDone;
+    slotsHtml+='<div class="slot-group" data-slot="'+slot+'"><div class="slot-title">'+SLOT_LABELS[slot]+'（'+slotTimeRange(slot)+'）</div>'+
+      (list.length?'<button type="button" class="btn btn-success btn-block slot-complete" data-slot-complete="'+slot+'"'+(btnDisabled?' disabled':'')+'>✅ 一鍵完成整個時段</button>':'')+
+      inner+'</div>';
+  });
+
+  if(!items.length){
+    slotsHtml='<div class="empty"><span class="emoji">🐾</span>尚未設定服藥日程，請先到庫存新增藥物，再為每隻藥設定服藥時間</div>';
+  }
+
+  const unlockBtn=readonly?'<button type="button" class="btn btn-sm btn-secondary" id="btn-unlock">🔓 解鎖補錄</button>':'';
+  const readonlyTag=readonly?'<span class="readonly-badge">唯讀模式</span>':'';
+
+  const dailyHtml=renderDailyNotesSection(date,readonly);
+  const mealsHtml=renderMealsSection(date,readonly);
+  el.innerHTML=viewHeaderHtml('每日服藥日程','按時段管理 Tricky 的服藥記錄')+
+    '<div class="card"><div class="date-nav">'+
+    '<button type="button" class="btn btn-sm btn-ghost" id="date-prev" aria-label="上一天">◀</button>'+
+    '<input type="date" id="schedule-date" value="'+date+'" max="'+todayStr()+'">'+
+    '<button type="button" class="btn btn-sm btn-ghost" id="date-next" aria-label="下一天">▶</button>'+
+    readonlyTag+unlockBtn+'</div>'+undoBar+slotsHtml+dailyHtml+'</div>'+
+    '<div class="card">'+mealsHtml+'</div>'+
+    '<div class="card" style="margin-top:1rem"><h2 style="font-size:1rem;margin-bottom:.75rem">設定服藥時間</h2><div id="schedule-config"></div></div>';
+
+  document.getElementById('schedule-date').onchange=e=>{scheduleDate=e.target.value;renderSchedule();};
+  document.getElementById('date-prev').onclick=()=>{scheduleDate=addDays(scheduleDate,-1);renderSchedule();};
+  document.getElementById('date-next').onclick=()=>{
+    if(scheduleDate<todayStr()){scheduleDate=addDays(scheduleDate,1);renderSchedule();}
+  };
+  const unlock=document.getElementById('btn-unlock');
+  if(unlock)unlock.onclick=()=>{scheduleUnlocked[date]=true;renderSchedule();showToast('已解鎖，可補錄記錄');};
+  const undoBtn=document.getElementById('btn-undo');
+  if(undoBtn)undoBtn.onclick=performUndo;
+
+  el.querySelectorAll('[data-slot-complete]').forEach(b=>b.onclick=()=>confirmSlotComplete(date,b.dataset.slotComplete));
+  el.querySelectorAll('[data-toggle-key]').forEach(inp=>inp.onchange=()=>toggleSingle(date,inp));
+
+  renderScheduleConfig();
+  bindDailyNotesEvents(date,readonly);
+  bindMealsEvents(date,readonly);
+}
+
+function getWalkTotalMinutes(date){
+  return getWalkTotalMinutesFromWalks(readDailyNoteDay(date).walks);
+}
+function renderWalkListHtml(date,readonly){
+  const walks=readDailyNoteDay(date).walks.map(normalizeWalk);
+  if(!walks.length)return'';
+  return'<ul class="walk-list">'+walks.map((w,i)=>{
+    const noteHtml=w.note?'<br><span style="color:var(--color-text-muted)">'+esc(w.note)+'</span>':'';
+    const delBtn=readonly?'':'<button type="button" class="btn-walk-del" data-del-walk="'+date+'" data-walk-idx="'+i+'" aria-label="刪除散步紀錄">🗑️</button>';
+    return'<li class="walk-row"><div class="walk-row-info"><strong>'+w.startTime+' · '+w.durationMinutes+' 分鐘</strong>'+noteHtml+'</div>'+delBtn+'</li>';
+  }).join('')+'</ul>';
+}
+function renderDailyNotesSection(date,readonly){
+  const totalWalk=getWalkTotalMinutes(date);
+  const d=readDailyNoteDay(date);
+  const poops=d.poops||[];
+  const isToday=date===todayStr();
+  const running=walkTimerStart&&scheduleDate===todayStr()&&isToday;
+  let elapsed='0:00';
+  if(running){
+    const sec=Math.floor((Date.now()-walkTimerStart)/1000);
+    elapsed=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
+  }
+  const poopCounts={normal:0,soft:0,none:0};
+  poops.forEach(p=>{if(poopCounts[p.status]!=null)poopCounts[p.status]++;});
+  const walkList=renderWalkListHtml(date,readonly);
+  const manualBtn=readonly?'':'<button type="button" class="btn btn-secondary btn-block" style="margin-top:.75rem" id="walk-manual">✏️ 手動補錄散步</button>';
+  const timerBtn=readonly?'':'<button type="button" class="btn btn-primary btn-block" id="walk-toggle">'+(running?'⏹ 停止計時':'▶ 開始計時')+'</button>';
+  return'<div class="daily-section"><h3>🐾 日常生活紀錄</h3>'+
+    '<p style="font-size:.875rem;margin-bottom:.5rem">今日總散步時長：<strong>'+totalWalk+'</strong> 分鐘</p>'+
+    (readonly?'<p class="form-hint">唯讀模式</p>':'')+
+    '<div class="walk-timer-display" id="walk-display">'+(running?elapsed:'—')+'</div>'+
+    timerBtn+manualBtn+walkList+
+    '<p style="margin-top:1rem;font-size:.875rem;font-weight:500">排便記錄</p>'+
+    '<div class="poop-btns">'+
+    ['normal','soft','none'].map(s=>'<button type="button" class="poop-btn'+(poopCounts[s]?' active':'')+'" data-poop="'+s+'" '+(readonly?'disabled':'')+'>'+POOP_LABELS[s]+'</button>').join('')+
+    '</div>'+
+    (poops.length?'<ul class="log-history" style="margin-top:.75rem">'+poops.slice().reverse().map(p=>'<li>'+p.time+' · '+POOP_LABELS[p.status]+'</li>').join('')+'</ul>':'')+
+    '</div>';
+}
+function renderMealsSection(date,readonly){
+  const meals=ensureMealsForDate(date);
+  const editTplBtn=readonly?'':'<button type="button" class="btn btn-sm btn-ghost" id="edit-feed-template">⚙️ 編輯預設模板</button>';
+  const rows=meals.map((m,i)=>'<div class="meal-row"><div class="meal-row-info"><strong>'+esc(m.name||('第'+(i+1)+'餐'))+'</strong><p>'+esc(m.note||'—')+'</p></div>'+
+    (readonly?'':'<button type="button" class="btn btn-sm btn-secondary" data-edit-meal="'+i+'">✏️ 修改</button>')+'</div>').join('');
+  return'<div class="meals-section"><div class="meals-header"><h3>🍽️ 今日餵食份量</h3>'+editTplBtn+'</div>'+rows+'</div>';
+}
+function openWalkModal(opts){
+  opts=opts||{};
+  const dateVal=opts.date||scheduleDate;
+  const totalMin=opts.minutes!=null?Math.max(0,Math.round(Number(opts.minutes))):0;
+  const hours=Math.floor(totalMin/60);
+  const mins=totalMin%60;
+  const startTime=opts.startTime||nowTimeStr();
+  const noteVal=opts.note||'';
+  const isEdit=opts.editDate!=null&&opts.editIdx!=null;
+  openModal(isEdit?'編輯散步紀錄':'手動補錄散步',
+    '<form id="walk-form">'+
+    '<div class="form-group"><label>日期 *</label><input type="date" name="walkDate" required max="'+todayStr()+'" value="'+dateVal+'"></div>'+
+    '<div class="form-group"><label>開始時間 *</label><input type="time" name="walkStart" required value="'+startTime+'"></div>'+
+    '<div class="form-row"><div class="form-group"><label>小時</label><input type="number" id="walk-hours" min="0" max="23" step="1" value="'+hours+'"></div>'+
+    '<div class="form-group"><label>分鐘 *</label><input type="number" id="walk-mins" min="1" max="599" step="1" value="'+(totalMin>0?totalMin:mins||'')+'" required></div></div>'+
+    '<div class="duration-quick">'+WALK_QUICK_MINS.map(m=>'<button type="button" class="walk-min-pick" data-min="'+m+'">'+m+'</button>').join('')+'</div>'+
+    '<div class="form-group" style="margin-top:1rem"><label>備註</label><textarea name="walkNote">'+esc(noteVal)+'</textarea></div></form>',
+    '<button type="button" class="btn btn-cancel" data-modal-cancel>取消</button><button type="button" class="btn btn-confirm" data-modal-save>儲存</button>');
+  const form=document.getElementById('walk-form');
+  const hInp=document.getElementById('walk-hours');
+  const mInp=document.getElementById('walk-mins');
+  function syncFromParts(){
+    const h=parseInt(hInp.value,10)||0;
+    const m=parseInt(mInp.value,10)||0;
+    return h*60+m;
+  }
+  function setTotalMinutes(total){
+    const t=Math.max(0,Math.round(total));
+    hInp.value=Math.floor(t/60);
+    mInp.value=t%60||t;
+  }
+  document.querySelectorAll('.walk-min-pick').forEach(btn=>{
+    btn.onclick=()=>{hInp.value=0;mInp.value=btn.dataset.min;};
+  });
+  document.querySelector('[data-modal-cancel]').onclick=closeModal;
+  document.querySelector('[data-modal-save]').onclick=()=>{
+    if(!form.reportValidity())return;
+    const fd=new FormData(form);
+    const saveDate=fd.get('walkDate');
+    const durationMinutes=syncFromParts();
+    if(durationMinutes<1){showToast('請輸入有效時長');return;}
+    const entry={id:isEdit?normalizeWalk(readDailyNoteDay(opts.editDate).walks[opts.editIdx]).id:Date.now(),
+      startTime:fd.get('walkStart'),durationMinutes,note:fd.get('walkNote').trim()};
+    const{all,day}=mutateDailyDay(saveDate);
+    day.walks=day.walks||[];
+    if(isEdit&&opts.editDate===saveDate){
+      day.walks[opts.editIdx]=entry;
+    }else if(isEdit){
+      const src=mutateDailyDay(opts.editDate);
+      src.day.walks.splice(opts.editIdx,1);
+      src.all[opts.editDate]=src.day;
+      day.walks.push(entry);
+      all[saveDate]=day;
+      saveDailyNotes(src.all);
+    }else{
+      day.walks.push(entry);
+    }
+    all[saveDate]=day;
+    saveDailyNotes(all);
+    closeModal();
+    renderSchedule();
+    if(currentView==='health'&&healthTab==='exercise')renderHealth();
+    if(currentView==='dashboard')renderDashboard();
+    showToast('散步紀錄已儲存');
+  };
+}
+function deleteWalkEntry(date,idx){
+  confirmDialog('刪除散步紀錄','確定要刪除此散步紀錄？',()=>{
+    const{all,day}=mutateDailyDay(date);
+    if(!day.walks||!day.walks[idx])return;
+    day.walks.splice(idx,1);
+    all[date]=day;
+    saveDailyNotes(all);
+    renderSchedule();
+    if(currentView==='health'&&healthTab==='exercise')renderHealth();
+    if(currentView==='dashboard')renderDashboard();
+    showToast('已刪除');
+  });
+}
+function openMealEditModal(date,mealIdx){
+  const meals=ensureMealsForDate(date);
+  const meal=meals[mealIdx];
+  if(!meal)return;
+  openModal('修改今日餐次 — '+esc(meal.name),
+    '<form id="meal-edit-form"><div class="form-group"><label>餐次名稱 *</label><input name="mealName" required maxlength="40" value="'+esc(meal.name)+'"></div>'+
+    '<div class="form-group"><label>份量備註 *</label><textarea name="mealNote" required>'+esc(meal.note)+'</textarea></div></form>',
+    '<button type="button" class="btn btn-cancel" data-modal-cancel>取消</button><button type="button" class="btn btn-confirm" data-modal-save>儲存</button>');
+  document.querySelector('[data-modal-cancel]').onclick=closeModal;
+  document.querySelector('[data-modal-save]').onclick=()=>{
+    const f=document.getElementById('meal-edit-form');
+    if(!f.reportValidity())return;
+    const fd=new FormData(f);
+    const{all,day}=mutateDailyDay(date);
+    day.meals=day.meals||JSON.parse(JSON.stringify(meals));
+    day.meals[mealIdx]={name:fd.get('mealName').trim(),note:fd.get('mealNote').trim()};
+    all[date]=day;
+    saveDailyNotes(all);
+    closeModal();renderSchedule();showToast('已更新今日餐次');
+  };
+}
+function openFeedTemplateModal(){
+  const tpl=getFeedTemplate();
+  const rows=tpl.map((m,i)=>'<div class="form-group"><label>第 '+(i+1)+' 餐名稱</label><input name="tplName'+i+'" required maxlength="40" value="'+esc(m.name)+'">'+
+    '<label style="margin-top:.5rem">份量備註</label><textarea name="tplNote'+i+'" required>'+esc(m.note)+'</textarea></div>').join('');
+  openModal('編輯預設餵食模板',
+    '<form id="feed-template-form"><p class="form-hint" style="margin-bottom:1rem">修改後只影響新日子的預填，不會覆蓋已儲存的每日紀錄</p>'+rows+'</form>',
+    '<button type="button" class="btn btn-cancel" data-modal-cancel>取消</button><button type="button" class="btn btn-confirm" data-modal-save>儲存模板</button>');
+  document.querySelector('[data-modal-cancel]').onclick=closeModal;
+  document.querySelector('[data-modal-save]').onclick=()=>{
+    const f=document.getElementById('feed-template-form');
+    if(!f.reportValidity())return;
+    const fd=new FormData(f);
+    const next=tpl.map((m,i)=>({name:fd.get('tplName'+i).trim(),note:fd.get('tplNote'+i).trim()}));
+    saveFeedTemplate(next);
+    closeModal();renderSchedule();showToast('預設模板已更新');
+  };
+}
+function bindDailyNotesEvents(date,readonly){
+  if(readonly)return;
+  const walkBtn=document.getElementById('walk-toggle');
+  if(walkBtn){
+    walkBtn.onclick=()=>{
+      if(date!==todayStr()){showToast('計時器僅適用於今日');return;}
+      if(walkTimerStart){
+        const durationMinutes=Math.max(1,Math.round((Date.now()-walkTimerStart)/60000));
+        const startHM=isoToHM(walkTimerStart);
+        walkTimerStart=null;
+        if(walkTimerInterval){clearInterval(walkTimerInterval);walkTimerInterval=null;}
+        openWalkModal({date:todayStr(),minutes:durationMinutes,startTime:startHM});
+      }else{
+        walkTimerStart=Date.now();
+        if(walkTimerInterval)clearInterval(walkTimerInterval);
+        walkTimerInterval=setInterval(()=>{
+          if(!walkTimerStart||scheduleDate!==todayStr())return;
+          const sec=Math.floor((Date.now()-walkTimerStart)/1000);
+          const el=document.getElementById('walk-display');
+          if(el)el.textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
+        },1000);
+        renderSchedule();
+      }
+    };
+  }
+  const manualBtn=document.getElementById('walk-manual');
+  if(manualBtn)manualBtn.onclick=()=>openWalkModal({date});
+  document.querySelectorAll('[data-del-walk]').forEach(b=>b.onclick=()=>deleteWalkEntry(b.dataset.delWalk,+b.dataset.walkIdx));
+  document.querySelectorAll('[data-poop]').forEach(btn=>{
+    btn.onclick=()=>{
+      const status=btn.dataset.poop;
+      const{all,day}=mutateDailyDay(date);
+      day.poops=day.poops||[];
+      if(day.poops.length&&day.poops[day.poops.length-1].status===status){
+        day.poops.pop();
+        showToast('已取消記錄');
+      }else{
+        day.poops.push({status,time:nowTimeStr()});
+        showToast('已記錄 '+POOP_LABELS[status]);
+      }
+      all[date]=day;
+      saveDailyNotes(all);
+      renderSchedule();
+    };
+  });
+}
+function bindMealsEvents(date,readonly){
+  if(readonly)return;
+  const tplBtn=document.getElementById('edit-feed-template');
+  if(tplBtn)tplBtn.onclick=openFeedTemplateModal;
+  document.querySelectorAll('[data-edit-meal]').forEach(b=>b.onclick=()=>openMealEditModal(date,+b.dataset.editMeal));
+}
+
+function getDailyForDate(date){
+  const all=getDailyNotes();
+  if(!all[date])all[date]={walks:[],poops:[]};
+  return all[date];
+}
+
+function slotTimeRange(slot){
+  if(slot==='morning')return'06:00–11:59';
+  if(slot==='noon')return'12:00–17:59';
+  return'18:00–05:59';
+}
+function addDays(s,delta){
+  const dt=parseDate(s);dt.setDate(dt.getDate()+delta);
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
+
+function confirmSlotComplete(date,slot){
+  const list=getAllScheduleItems().filter(it=>it.slot===slot&&scheduleDate===date);
+  if(!list.length)return;
+  confirmDialog('一鍵完成時段','確定要將「'+SLOT_LABELS[slot]+'」所有服藥標記為完成？將會扣減相應庫存。',()=>completeSlot(date,slot));
+}
+
+function completeSlot(date,slot){
+  const comp=getCompletionsForDate(date);
+  const list=getAllScheduleItems().filter(it=>it.slot===slot);
+  const snapshot={date,slot,items:[],doseLogIds:[]};
+  const session=SLOT_LABELS[slot];
+  list.forEach(it=>{
+    const key=completionKey(it.med.id,it.time);
+    if(comp.items[key])return;
+    const dose=parseDoseValue(it.dose)||parseDoseValue(it.med.dosePerTime);
+    comp.items[key]=true;
+    deductMedStock(it.med,dose);
+    const logId=addDoseLog(it.med.id,it.med.name,dose,date,session);
+    snapshot.items.push({key,medId:it.med.id,dose});
+    snapshot.doseLogIds.push(logId);
+  });
+  saveState();
+  pendingUndo=snapshot;
+  if(undoTimer)clearTimeout(undoTimer);
+  undoTimer=setTimeout(()=>{pendingUndo=null;renderSchedule();},30000);
+  renderSchedule();
+  showToast(SLOT_LABELS[slot]+' 已完成');
+}
+
+function performUndo(){
+  if(!pendingUndo)return;
+  const comp=getCompletionsForDate(pendingUndo.date);
+  pendingUndo.items.forEach(({key,medId,dose})=>{
+    delete comp.items[key];
+    const med=state.medications.find(m=>m.id===medId);
+    if(med)restoreMedStock(med,dose);
+  });
+  removeDoseLogsByIds(pendingUndo.doseLogIds||[]);
+  saveState();
+  pendingUndo=null;
+  if(undoTimer){clearTimeout(undoTimer);undoTimer=null;}
+  renderSchedule();
+  showToast('已撤銷');
+}
+
+function toggleSingle(date,inp){
+  if(isReadonlyScheduleDate(date)){inp.checked=!inp.checked;return;}
+  const comp=getCompletionsForDate(date);
+  const key=inp.dataset.toggleKey;
+  const medId=inp.dataset.med;
+  const dose=parseDoseValue(inp.dataset.dose);
+  const schedTime=inp.dataset.time;
+  const med=state.medications.find(m=>m.id===medId);
+  if(!med){inp.checked=false;return;}
+  if(inp.checked){
+    if(med.stock<dose){showToast('庫存不足');inp.checked=false;return;}
+    comp.items[key]=true;
+    deductMedStock(med,dose);
+    const session=SLOT_LABELS[getSlot(schedTime)]||'其他';
+    addDoseLog(medId,med.name,dose,date,session);
+    showToast('已標記完成');
+  }else{
+    delete comp.items[key];
+    restoreMedStock(med,dose);
+    removeLatestDoseLog(medId,date);
+    showToast('已取消標記');
+  }
+  saveState();
+  if(currentView==='dashboard')renderDashboard();
+}
+
+function renderScheduleConfig(){
+  const box=document.getElementById('schedule-config');
+  if(!box)return;
+  if(!state.medications.length){
+    box.innerHTML='<div class="empty"><span class="emoji">🐾</span>請先新增藥物</div>';
+    return;
+  }
+  box.innerHTML=state.medications.map(med=>{
+    const slots=state.schedules[med.id]||[];
+    const rows=slots.map((s,i)=>'<div class="form-row" style="align-items:end;margin-bottom:.5rem">'+
+      '<div class="form-group"><label>時間</label><input type="time" data-med="'+med.id+'" data-idx="'+i+'" value="'+s.time+'"></div>'+
+      '<div class="form-group"><label>每次劑量</label><div class="dose-row"><input type="number" data-med-dose="'+med.id+'" data-idx="'+i+'" data-dose-input="sched-'+med.id+'-'+i+'" min="0.01" step="0.001" value="'+(s.dose!=null?s.dose:med.dosePerTime)+'">'+
+      '<div class="dose-quick">'+DOSE_FRACS.map(f=>'<button type="button" class="dose-pick" data-target="sched-'+med.id+'-'+i+'" data-val="'+f.v+'">'+f.l+'</button>').join('')+'</div></div></div>'+
+      '<button type="button" class="icon-btn icon-del" data-rm-slot="'+med.id+'" data-idx="'+i+'" aria-label="刪除"><i data-lucide="trash-2"></i></button></div>').join('');
+    return'<div style="margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--color-border)">'+
+      '<strong>'+esc(med.name)+'</strong>'+rows+
+      '<button type="button" class="btn btn-sm btn-secondary" data-add-slot="'+med.id+'">＋ 新增時間點</button></div>';
+  }).join('');
+
+  box.querySelectorAll('input[type=time]').forEach(inp=>{
+    inp.onchange=()=>{
+      const medId=inp.dataset.med;
+      const idx=+inp.dataset.idx;
+      state.schedules[medId][idx].time=inp.value;
+      saveState();renderSchedule();
+    };
+  });
+  box.querySelectorAll('[data-med-dose]').forEach(inp=>{
+    const save=()=>{
+      const medId=inp.dataset.medDose;
+      const idx=+inp.dataset.idx;
+      state.schedules[medId][idx].dose=parseDoseValue(inp.value)||1;
+      saveState();
+    };
+    inp.onchange=save;
+    inp.oninput=save;
+  });
+  bindDoseQuick(box);
+  icons();
+  box.querySelectorAll('[data-add-slot]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.addSlot;
+    if(!state.schedules[id])state.schedules[id]=[];
+    state.schedules[id].push({time:'08:00',dose:state.medications.find(m=>m.id===id).dosePerTime});
+    saveState();renderSchedule();
+  });
+  box.querySelectorAll('[data-rm-slot]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.rmSlot;
+    const idx=+b.dataset.idx;
+    confirmDialog('刪除時間點','確定刪除此服藥時間？',()=>{
+      state.schedules[id].splice(idx,1);
+      saveState();renderSchedule();
+    });
+  });
+}
+
+function renderHealth(){
+  const el=document.getElementById('view-health');
+  el.innerHTML=viewHeaderHtml('健康記錄','體重、異常、醫療同運動紀錄')+
+    '<div class="tabs-inner">'+
+    '<button type="button" class="tab-inner'+(healthTab==='weight'?' active':'')+'" data-htab="weight">體重</button>'+
+    '<button type="button" class="tab-inner'+(healthTab==='abnormal'?' active':'')+'" data-htab="abnormal">異常</button>'+
+    '<button type="button" class="tab-inner'+(healthTab==='medical'?' active':'')+'" data-htab="medical">醫療</button>'+
+    '<button type="button" class="tab-inner'+(healthTab==='exercise'?' active':'')+'" data-htab="exercise">🏃 運動</button></div>'+
+    '<div id="health-panel"></div>';
+  el.querySelectorAll('[data-htab]').forEach(b=>b.onclick=()=>{healthTab=b.dataset.htab;renderHealth();updateFab();});
+  const panel=document.getElementById('health-panel');
+  if(healthTab==='weight')renderWeightTab(panel);
+  else if(healthTab==='abnormal')renderAbnormalTab(panel);
+  else if(healthTab==='exercise')renderExerciseTab(panel);
+  else renderMedicalTab(panel);
+}
+
+function renderExerciseTab(panel){
+  const total7=getPast7WalkTotal();
+  const entries=getAllWalkTimeline();
+  let body='';
+  if(!entries.length){
+    body='<div class="empty"><span class="emoji">🐾</span>還未有散步紀錄，去日程頁開始計時或手動補錄啦</div>';
+  }else{
+    body='<ul class="timeline">'+entries.map(e=>{
+      const w=e.walk;
+      const noteHtml=w.note?'<p>'+esc(w.note)+'</p>':'';
+      return'<li class="timeline-item"><div class="timeline-card"><h3>'+w.durationMinutes+' 分鐘</h3>'+
+        '<p class="meta">'+esc(e.date)+' · '+esc(w.startTime)+' 開始</p>'+noteHtml+'</div></li>';
+    }).join('')+'</ul>';
+  }
+  panel.innerHTML='<div class="card"><p class="exercise-stat">📊 過去 7 日總散步時長：'+total7+' 分鐘</p>'+body+'</div>';
+}
+
+function renderWeightTab(panel){
+  const logs=[...state.weightLogs].sort((a,b)=>a.date.localeCompare(b.date));
+  const chart=logs.length?'<div class="card"><h2 style="font-size:1rem;margin-bottom:.5rem">近 30 次體重趨勢</h2><div class="chart-wrap"><canvas id="weight-canvas" aria-label="體重折線圖"></canvas></div></div>':'';
+  let list='';
+  if(!logs.length){
+    list='<div class="empty"><span class="emoji">🐾</span>還未有體重記錄，點擊 ＋ 開始記錄</div>';
+  }else{
+    const rev=[...logs].reverse();
+    list='<ul class="log-list">'+rev.map(w=>'<li class="log-item"><h3>'+w.kg+' kg</h3><p class="meta">'+w.date+'</p>'+
+      '<button type="button" class="btn btn-sm btn-secondary" data-edit-w="'+w.id+'">編輯</button> '+
+      '<button type="button" class="btn btn-sm btn-danger" data-del-w="'+w.id+'">刪除</button></li>').join('')+'</ul>';
+  }
+  panel.innerHTML=chart+'<div class="card">'+list+'</div>';
+  if(logs.length){requestAnimationFrame(()=>drawWeightChart(logs.slice(-30)));}
+  panel.querySelectorAll('[data-edit-w]').forEach(b=>b.onclick=()=>openWeightForm(b.dataset.editW));
+  panel.querySelectorAll('[data-del-w]').forEach(b=>b.onclick=()=>deleteWeight(b.dataset.delW));
+}
+
+function drawWeightChart(logs){
+  const canvas=document.getElementById('weight-canvas');
+  if(!canvas)return;
+  const wrap=canvas.parentElement;
+  const w=wrap.offsetWidth||300;
+  const h=200;
+  canvas.width=w;
+  canvas.height=h;
+  const ctx=canvas.getContext('2d');
+  const pad={t:24,r:16,b:36,l:44};
+  const cw=w-pad.l-pad.r;
+  const ch=h-pad.t-pad.b;
+  const vals=logs.map(l=>l.kg);
+  const min=Math.min(...vals);
+  const max=Math.max(...vals);
+  const range=max-min||1;
+  const bg=getComputedStyle(document.documentElement).getPropertyValue('--color-surface').trim()||'#f9f8f5';
+  const primary=getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim()||'#01696f';
+  const muted=getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim()||'#7a7974';
+  const err=getComputedStyle(document.documentElement).getPropertyValue('--color-error').trim()||'#a12c7b';
+  const success=getComputedStyle(document.documentElement).getPropertyValue('--color-success').trim()||'#437a22';
+  ctx.fillStyle=bg;
+  ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle=muted;
+  ctx.lineWidth=1;
+  ctx.globalAlpha=.3;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+ch*i/4;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  const pts=logs.map((l,i)=>{
+    const x=pad.l+(logs.length===1?cw/2:cw*i/(logs.length-1));
+    const y=pad.t+ch-(l.kg-min)/range*ch;
+    return{x,y,kg:l.kg,date:l.date};
+  });
+  ctx.strokeStyle=primary;
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  pts.forEach((p,i)=>{if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);});
+  ctx.stroke();
+  let minIdx=0,maxIdx=0;
+  vals.forEach((v,i)=>{if(v<=vals[minIdx])minIdx=i;if(v>=vals[maxIdx])maxIdx=i;});
+  pts.forEach((p,i)=>{
+    ctx.fillStyle=primary;
+    ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill();
+    if(i===minIdx||i===maxIdx){
+      ctx.fillStyle=i===maxIdx?err:success;
+      ctx.beginPath();ctx.arc(p.x,p.y,6,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim();
+      ctx.font='11px Noto Sans TC,sans-serif';
+      ctx.textAlign='center';
+      const label=(i===maxIdx?'最高 ':'最低 ')+p.kg+'kg';
+      ctx.fillText(label,p.x,p.y-12);
+    }
+  });
+  ctx.fillStyle=muted;
+  ctx.font='10px Noto Sans TC,sans-serif';
+  ctx.textAlign='center';
+  const step=Math.max(1,Math.floor(logs.length/5));
+  pts.forEach((p,i)=>{
+    if(i%step===0||i===pts.length-1){
+      const short=p.date.slice(5);
+      ctx.fillText(short,p.x,h-8);
+    }
+  });
+}
+
+function openWeightForm(id){
+  const w=id?state.weightLogs.find(x=>x.id===id):null;
+  const ownerW=getOwnerWeight();
+  openModal(id?'編輯體重':'新增體重',
+    '<form id="weight-form"><div class="form-group"><label>日期 *</label><input type="date" name="date" required max="'+todayStr()+'" value="'+(w?w.date:todayStr())+'"></div>'+
+    '<label class="toggle-wrap" style="margin-bottom:1rem"><span>輔助計算模式</span><span class="toggle"><input type="checkbox" id="weight-calc-toggle"><span class="toggle-slider"></span></span></label>'+
+    '<div id="weight-calc-panel" class="weight-calc-panel" style="display:none">'+
+    '<div class="form-group"><label>抱起後總重量 (kg)</label><input type="number" id="w-total" min="0" step="0.01" placeholder="0.00"></div>'+
+    '<div class="form-group"><label>主人自身重量 (kg)</label><input type="number" id="w-owner" min="0" step="0.01" placeholder="0.00"></div>'+
+    '<p class="weight-calc-result" id="w-calc-result">Tricky 體重 = — kg</p></div>'+
+    '<div class="form-group"><label>Tricky 體重 (kg) *</label><input type="number" name="kg" required min="0.1" step="0.01" value="'+(w?w.kg:'')+'"></div></form>',
+    '<button type="button" class="btn btn-cancel" data-modal-cancel>取消</button><button type="button" class="btn btn-confirm" data-modal-save>儲存</button>');
+  const form=document.getElementById('weight-form');
+  const kgInp=form.querySelector('[name=kg]');
+  const calcToggle=document.getElementById('weight-calc-toggle');
+  const calcPanel=document.getElementById('weight-calc-panel');
+  const wTotal=document.getElementById('w-total');
+  const wOwner=document.getElementById('w-owner');
+  const wResult=document.getElementById('w-calc-result');
+  let kgManualOverride=false;
+  kgInp.addEventListener('input',()=>{kgManualOverride=true;});
+  function persistOwnerWeight(){
+    const owner=parseFloat(wOwner.value);
+    if(!isNaN(owner)&&owner>0)setOwnerWeight(owner);
+  }
+  function updateCalc(){
+    const total=parseFloat(wTotal.value);
+    const owner=parseFloat(wOwner.value);
+    if(!isNaN(total)&&!isNaN(owner)&&total>owner){
+      const tricky=total-owner;
+      const trickyDisplay=Math.round(tricky*100)/100;
+      wResult.textContent='Tricky 體重 = '+trickyDisplay+' kg';
+      if(calcToggle.checked&&!kgManualOverride)kgInp.value=trickyDisplay;
+    }else wResult.textContent='Tricky 體重 = — kg';
+  }
+  function showCalcPanel(show){
+    calcPanel.style.display=show?'block':'none';
+    if(show){
+      if(ownerW&&!wOwner.value)wOwner.value=ownerW;
+      kgManualOverride=false;
+      updateCalc();
+    }
+  }
+  calcToggle.onchange=()=>showCalcPanel(calcToggle.checked);
+  wTotal.oninput=()=>{kgManualOverride=false;updateCalc();};
+  wOwner.oninput=()=>{persistOwnerWeight();kgManualOverride=false;updateCalc();};
+  document.querySelector('[data-modal-cancel]').onclick=closeModal;
+  document.querySelector('[data-modal-save]').onclick=()=>{
+    if(!form.reportValidity())return;
+    const fd=new FormData(form);
+    const data={date:fd.get('date'),kg:parseFloat(fd.get('kg'))};
+    if(isNaN(data.kg)||data.kg<=0){showToast('請輸入有效體重');return;}
+    persistOwnerWeight();
+    if(id){const i=state.weightLogs.findIndex(x=>x.id===id);if(i>=0)state.weightLogs[i]={...state.weightLogs[i],...data};}
+    else state.weightLogs.push({id:uid(),...data});
+    saveState();closeModal();renderHealth();showToast('已儲存');
+  };
+  icons();
+}
+function deleteWeight(id){
+  confirmDialog('刪除記錄','確定刪除此體重記錄？',()=>{
+    state.weightLogs=state.weightLogs.filter(x=>x.id!==id);
+    saveState();renderHealth();showToast('已刪除');
+  });
+}
+
+function renderAbnormalTab(panel){
+  const logs=[...state.abnormalLogs].sort((a,b)=>b.date.localeCompare(a.date));
+  let list='';
+  if(!logs.length){
+    list='<div class="empty"><span class="emoji">🐾</span>還未有異常記錄，希望 Tricky 一直健健康康</div>';
+  }else{
+    list='<ul class="log-list">'+logs.map(a=>'<li class="log-item"><h3>'+esc(a.type)+'</h3><p class="meta">'+a.date+'</p><p>'+esc(a.description||'—')+'</p>'+
+      '<button type="button" class="btn btn-sm btn-secondary" data-edit-a="'+a.id+'">編輯</button> '+
+      '<button type="button" class="btn btn-sm btn-danger" data-del-a="'+a.id+'">刪除</button></li>').join('')+'</ul>';
+  }
+  panel.innerHTML='<div class="card">'+list+'</div>';
+  panel.querySelectorAll('[data-edit-a]').forEach(b=>b.onclick=()=>openAbnormalForm(b.dataset.editA));
+  panel.querySelectorAll('[data-del-a]').forEach(b=>b.onclick=()=>deleteAbnormal(b.dataset.delA));
+}
+
+function openAbnormalForm(id){
+  const a=id?state.abnormalLogs.find(x=>x.id===id):null;
+  const opts=ABNORMAL_TYPES.map(t=>'<option value="'+t+'"'+(a&&a.type===t?' selected':'')+'>'+t+'</option>').join('');
+  openModal(id?'編輯異常':'新增異常',
+    '<form id="abnormal-form"><div class="form-group"><label>日期 *</label><input type="date" name="date" required max="'+todayStr()+'" value="'+(a?a.date:todayStr())+'"></div>'+
+    '<div class="form-group"><label>類型 *</label><select name="type" required>'+opts+'</select></div>'+
+    '<div class="form-group"><label>描述</label><textarea name="description">'+(a?esc(a.description):'')+'</textarea></div></form>',
+    '<button type="button" class="btn btn-cancel" data-modal-cancel>取消</button><button type="button" class="btn btn-confirm" data-modal-save>儲存</button>');
+  document.querySelector('[data-modal-cancel]').onclick=closeModal;
+  document.querySelector('[data-modal-save]').onclick=()=>{
+    const f=document.getElementById('abnormal-form');
+    if(!f.reportValidity())return;
+    const fd=new FormData(f);
+    const data={date:fd.get('date'),type:fd.get('type'),description:fd.get('description').trim()};
+    if(id){const i=state.abnormalLogs.findIndex(x=>x.id===id);if(i>=0)state.abnormalLogs[i]={...state.abnormalLogs[i],...data};}
+    else state.abnormalLogs.push({id:uid(),...data});
+    saveState();closeModal();renderHealth();showToast('已儲存');
+  };
+}
+function deleteAbnormal(id){
+  confirmDialog('刪除記錄','確定刪除此異常記錄？',()=>{
+    state.abnormalLogs=state.abnormalLogs.filter(x=>x.id!==id);
+    saveState();renderHealth();showToast('已刪除');
+  });
+}
+
+function renderMedicalTab(panel){
+  const logs=[...state.medicalLogs].sort((a,b)=>b.date.localeCompare(a.date));
+  let list='';
+  if(!logs.length){
+    list='<div class="empty"><span class="emoji">🐾</span>還未有醫療記錄，可記錄睇獸醫或檢查資料</div>';
+  }else{
+    list='<ul class="log-list">'+logs.map(m=>{
+      const link=m.driveLink?'<button type="button" class="btn btn-sm btn-primary" data-open-link="'+encodeURIComponent(m.driveLink)+'">🔗 開啟檔案</button>':'';
+      return'<li class="log-item"><h3>'+esc(m.title)+'</h3><p class="meta">'+m.date+'</p><p>'+esc(m.notes||'—')+'</p>'+link+
+        ' <button type="button" class="btn btn-sm btn-secondary" data-edit-m="'+m.id+'">編輯</button> '+
+        '<button type="button" class="btn btn-sm btn-danger" data-del-m="'+m.id+'">刪除</button></li>';
+    }).join('')+'</ul>';
+  }
+  panel.innerHTML='<div class="card">'+list+'</div>';
+  panel.querySelectorAll('[data-open-link]').forEach(b=>b.onclick=()=>{
+    const url=decodeURIComponent(b.dataset.openLink);
+    if(url)window.open(url,'_blank');
+    else showToast('未有連結');
+  });
+  panel.querySelectorAll('[data-edit-m]').forEach(b=>b.onclick=()=>openMedicalForm(b.dataset.editM));
+  panel.querySelectorAll('[data-del-m]').forEach(b=>b.onclick=()=>deleteMedical(b.dataset.delM));
+}
+
+function openMedicalForm(id){
+  const m=id?state.medicalLogs.find(x=>x.id===id):null;
+  openModal(id?'編輯醫療記錄':'新增醫療記錄',
+    '<form id="medical-form"><div class="form-group"><label>日期 *</label><input type="date" name="date" required max="'+todayStr()+'" value="'+(m?m.date:todayStr())+'"></div>'+
+    '<div class="form-group"><label>標題 *</label><input name="title" required maxlength="120" value="'+(m?esc(m.title):'')+'"></div>'+
+    '<div class="form-group"><label>備註</label><textarea name="notes">'+(m?esc(m.notes):'')+'</textarea></div>'+
+    '<div class="form-group"><label>Google Drive 分享連結</label><input type="url" name="driveLink" placeholder="https://..." value="'+(m?esc(m.driveLink):'')+'">'+
+    '<p class="form-hint">請將 PDF/相片上傳至 Google Drive 後貼上分享連結</p></div></form>',
+    '<button type="button" class="btn btn-cancel" data-modal-cancel>取消</button><button type="button" class="btn btn-confirm" data-modal-save>儲存</button>');
+  document.querySelector('[data-modal-cancel]').onclick=closeModal;
+  document.querySelector('[data-modal-save]').onclick=()=>{
+    const f=document.getElementById('medical-form');
+    if(!f.reportValidity())return;
+    const fd=new FormData(f);
+    const data={date:fd.get('date'),title:fd.get('title').trim(),notes:fd.get('notes').trim(),driveLink:fd.get('driveLink').trim()};
+    if(!data.title){showToast('請輸入標題');return;}
+    if(id){const i=state.medicalLogs.findIndex(x=>x.id===id);if(i>=0)state.medicalLogs[i]={...state.medicalLogs[i],...data};}
+    else state.medicalLogs.push({id:uid(),...data});
+    saveState();closeModal();renderHealth();showToast('已儲存');
+  };
+}
+function deleteMedical(id){
+  confirmDialog('刪除記錄','確定刪除此醫療記錄？',()=>{
+    state.medicalLogs=state.medicalLogs.filter(x=>x.id!==id);
+    saveState();renderHealth();showToast('已刪除');
+  });
+}
+
+function csvEscape(v){
+  const s=String(v==null?'':v);
+  if(/[",\n\r]/.test(s))return'"'+s.replace(/"/g,'""')+'"';
+  return s;
+}
+function downloadBlob(filename,content,type){
+  const blob=new Blob([content],{type:type||'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function exportCsvStock(){
+  const BOM='\uFEFF';
+  const header=['名稱','類型','庫存數量','單位','每次劑量','低庫存閾值'];
+  const rows=state.medications.map(m=>[
+    m.name,m.type==='drug'?'藥物':'保健品',m.stock,m.unit,m.dosePerTime,m.lowStockThreshold
+  ]);
+  const csv=BOM+header.join(',')+'\n'+rows.map(r=>r.map(csvEscape).join(',')).join('\n');
+  downloadBlob('tricky-stock-'+todayStr()+'.csv',csv,'text/csv;charset=utf-8');
+  showToast('已匯出庫存 CSV');
+}
+function exportCsvHistory(){
+  const BOM='\uFEFF';
+  const lines=[['類別','日期','藥物/項目','時間','劑量','單位/時段','狀態','備註','散步總時長(分鐘)','排便狀況','第1餐份量','第2餐份量','第3餐份量','第4餐份量'].map(csvEscape).join(',')];
+  const dailyMap=getDailyNotes();
+  function extraCols(date){
+    const day=dailyMap[date]||{};
+    const walkTotal=(day.walks||[]).reduce((s,w)=>s+(Number(w.durationMinutes)||0),0);
+    const poopText=(day.poops||[]).map(p=>{
+      const l=POOP_LABELS[p.status]||p.status||'';
+      return l.replace(/^✅\s*|^💧\s*|^❌\s*/,'');
+    }).filter(Boolean).join('/');
+    const meals=Array.isArray(day.meals)?day.meals:[];
+    const m1=meals[0]&&meals[0].note?meals[0].note:'';
+    const m2=meals[1]&&meals[1].note?meals[1].note:'';
+    const m3=meals[2]&&meals[2].note?meals[2].note:'';
+    const m4=meals[3]&&meals[3].note?meals[3].note:'';
+    return[walkTotal||'',poopText,m1,m2,m3,m4];
+  }
+  getDoseLogs().slice().reverse().forEach(l=>{
+    const med=state.medications.find(m=>m.id===l.medicineId);
+    lines.push(['扣數',l.date,l.medicineName,l.time,l.qty,med?med.unit:l.session,'已服藥','',...extraCols(l.date)].map(csvEscape).join(','));
+  });
+  Object.keys(state.completions).sort().forEach(date=>{
+    const comp=state.completions[date];
+    Object.keys(comp.items||{}).forEach(key=>{
+      if(!comp.items[key])return;
+      const us=key.lastIndexOf('_');
+      const medId=key.slice(0,us);
+      const time=key.slice(us+1);
+      const med=state.medications.find(m=>m.id===medId);
+      const sched=(state.schedules[medId]||[]).find(s=>s.time===time);
+      const dose=sched?sched.dose:(med?med.dosePerTime:'');
+      lines.push(['服藥記錄',date,med?med.name:'',time,dose,med?med.unit:'','已完成','',...extraCols(date)].map(csvEscape).join(','));
+    });
+  });
+  Object.keys(dailyMap).sort().forEach(date=>{
+    const d=dailyMap[date];
+    const walkMin=(d.walks||[]).reduce((s,w)=>s+(w.durationMinutes||0),0);
+    if(walkMin>0)lines.push(['散步',date,'總時長','',walkMin+'分鐘','','','',...extraCols(date)].map(csvEscape).join(','));
+    (d.poops||[]).forEach(p=>{
+      lines.push(['排便',date,POOP_LABELS[p.status]||p.status,p.time||'','','','',...extraCols(date)].map(csvEscape).join(','));
+    });
+  });
+  state.abnormalLogs.forEach(a=>{
+    lines.push(['異常',a.date,a.type,'','','','',a.description||'',...extraCols(a.date)].map(csvEscape).join(','));
+  });
+  state.weightLogs.forEach(w=>{
+    lines.push(['體重',w.date,w.kg+'kg','','','','','',...extraCols(w.date)].map(csvEscape).join(','));
+  });
+  downloadBlob('tricky-history-'+todayStr()+'.csv',BOM+lines.join('\n'),'text/csv;charset=utf-8');
+  showToast('已匯出歷史 CSV');
+}
+function exportCsvStockLogs(){
+  const BOM='\uFEFF';
+  const header=['日期','時間','藥物名稱','補充數量'];
+  const rows=getStockLogs().map(l=>[l.date||'',l.time||'',l.medicineName||'',l.qty||'']);
+  const csv=BOM+header.join(',')+'\n'+rows.map(r=>r.map(csvEscape).join(',')).join('\n');
+  downloadBlob('tricky-stock-logs-'+todayStr()+'.csv',csv,'text/csv;charset=utf-8');
+  showToast('已匯出入貨紀錄 CSV');
+}
+function exportJson(){
+  downloadBlob('tricky-backup-'+todayStr()+'.json',JSON.stringify(getFullBackup(),null,2),'application/json');
+  showToast('已匯出 JSON 備份');
+}
+function importJson(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      confirmDialog('還原資料','此操作將覆蓋現有資料，確定要繼續？',()=>{
+        restoreFullBackup(data);
+        saveState();
+        initExtraKeys();
+        scheduleUnlocked={};
+        pendingUndo=null;
+        expandedMedLogs={};
+        applyTheme();
+        render();
+        showToast('資料已還原');
+      });
+    }catch(e){showToast('JSON 格式無效');}
+  };
+  reader.readAsText(file);
+}
+
+function renderBackup(){
+  const el=document.getElementById('view-backup');
+  el.innerHTML=viewHeaderHtml('備份與匯出','匯出資料備份，或轉移去其他裝置')+
+    '<div class="card" style="margin-bottom:1rem"><button type="button" class="theme-switch-btn" id="theme-toggle-mobile" aria-label="切換顯示模式"><i data-lucide="sun"></i><span class="theme-switch-label">淺色</span></button></div>'+
+    '<div class="card export-grid">'+
+    '<div><h2 style="font-size:1rem;margin-bottom:.5rem">CSV 匯出</h2>'+
+    '<p class="form-hint" style="margin-bottom:.75rem">含 BOM，適用 Windows Excel 繁中顯示</p>'+
+    '<button type="button" class="btn btn-primary btn-block" id="exp-csv-stock">匯出藥物庫存清單</button>'+
+    '<button type="button" class="btn btn-secondary btn-block" style="margin-top:.5rem" id="exp-csv-hist">匯出服藥歷史 + 健康記錄</button>'+
+    '<button type="button" class="btn btn-secondary btn-block" style="margin-top:.5rem" id="exp-csv-stock-logs">匯出入貨紀錄</button></div>'+
+    '<div><h2 style="font-size:1rem;margin-bottom:.5rem">JSON 備份</h2>'+
+    '<p class="form-hint" style="margin-bottom:.75rem">電腦設定好後 Export，手機 Import 即可轉移</p>'+
+    '<button type="button" class="btn btn-primary btn-block" id="exp-json">匯出 JSON 備份</button>'+
+    '<label class="btn btn-secondary btn-block" style="margin-top:.5rem;cursor:pointer;text-align:center">'+
+    '匯入 JSON 還原<input type="file" class="hidden-input" id="imp-json" accept=".json,application/json"></label></div></div>';
+  document.getElementById('exp-csv-stock').onclick=exportCsvStock;
+  document.getElementById('exp-csv-hist').onclick=exportCsvHistory;
+  document.getElementById('exp-csv-stock-logs').onclick=exportCsvStockLogs;
+  document.getElementById('exp-json').onclick=exportJson;
+  document.getElementById('imp-json').onchange=e=>{
+    const f=e.target.files[0];
+    if(f)importJson(f);
+    e.target.value='';
+  };
+  document.getElementById('theme-toggle-mobile').onclick=cycleTheme;
+  applyTheme();
+}
+
+window.addEventListener('resize',()=>{
+  if(currentView==='health'&&healthTab==='weight'&&state.weightLogs.length){
+    const logs=[...state.weightLogs].sort((a,b)=>a.date.localeCompare(b.date)).slice(-30);
+    drawWeightChart(logs);
+  }
+});
+
+initExtraKeys();
+initThemeFromStorage();
+initThemeListener();
+buildNav();
+applyTheme();
+render();
+
+if('serviceWorker' in navigator){
+  const sw=`self.addEventListener('install',e=>e.waitUntil(caches.open('tricky-v1').then(c=>c.addAll([location.pathname]))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'})));
+}
+})();
+</script>
+</body>
+</html>
