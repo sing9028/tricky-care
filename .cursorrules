@@ -1,0 +1,24 @@
+# Tricky Care App 開發規範
+
+【專案架構】
+- 核心架構：單一檔案 Web App (tricky-health.html)。
+- 技術限制：純原生 HTML5、CSS3、Vanilla JS。
+- 依賴限制：禁止使用任何外部 CSS 框架（如 Tailwind）或 Chart.js 庫。圖表必須使用原生 Canvas API 繪製。禁止使用 glassmorphism 效果（backdrop-filter: blur()）。
+
+【資料儲存與安全】
+- 儲存機制：完全使用 localStorage。嚴禁 Base64 儲存圖片或大檔案，圖片/PDF 一律使用 Google Drive 分享連結。
+- 向下相容：嚴禁破壞既有 localStorage 數據結構。新增 key 不存在時自動初始化為 [] 或 {}，確保舊數據不遺失。
+- 相容性檢查：每次修改後確保 30 秒 Undo 機制、Export/Import JSON 備份功能正常運作。
+
+【UI/UX 與視覺規範】
+- 主題色系：主色 #01696f, hover #0c4e54, 背景 #fbfbfd, 文字 #2c2c2e, muted #6e6e73。
+- 圖標規範：使用已引入的 Lucide Icons CDN。透過 JS 動態新增 DOM 後，必須立即調用 lucide.createIcons() 刷新圖標。
+- 介面語言：全繁體中文（香港習慣用語）。
+
+【彈窗與互動防呆】
+- Modal 規範：全系統所有 Modal Popup 禁止 backdrop click 及 ESC 鍵關閉。
+- 關閉邏輯：只能透過「確認/儲存/取消/✕」按鈕關閉，防止誤觸導致資料遺失。
+- 例外：通知 Dropdown 面板不是 Modal，可 click outside 關閉，不受上述規則限制。
+
+【Export 規範】
+- 所有 CSV export 必須在檔案開頭加 \uFEFF BOM header，確保 Windows Excel 開啟繁中不亂碼。
