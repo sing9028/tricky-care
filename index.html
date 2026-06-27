@@ -8,6 +8,11 @@
 <meta name="theme-color" content="#01696f">
 <meta name="apple-mobile-web-app-title" content="Tricky Care">
 <title>Tricky Care — 寵物健康管家</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -232,6 +237,13 @@ a{color:var(--color-primary)}
 .poop-btns{display:flex;gap:.75rem;flex-wrap:wrap}
 .poop-btn{min-width:44px;min-height:44px;padding:.5rem 1rem;border:2px solid var(--color-border);background:var(--color-surface);border-radius:var(--radius);cursor:pointer;font-size:.875rem;font-weight:500}
 .poop-btn.active{border-color:var(--color-primary);background:rgba(1,105,111,.1);color:var(--color-primary)}
+.poop-detail-fields{margin-top:.25rem}
+.poop-detail-fields.hidden{display:none}
+.poop-list{margin:.75rem 0 0;padding:0;list-style:none}
+.poop-row{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--color-border)}
+.poop-row:last-child{border-bottom:none}
+.poop-row-info{flex:1;font-size:.875rem}
+.poop-row-info strong{display:block;margin-bottom:.2rem}
 .weight-calc-panel{margin-top:1rem;padding:1rem;background:rgba(1,105,111,.06);border-radius:var(--radius);border:1px solid var(--color-border)}
 .weight-calc-result{font-weight:700;color:var(--color-primary);margin-top:.5rem}
 .empty{text-align:center;padding:2.5rem 1rem;color:var(--color-text-muted)}
@@ -360,7 +372,7 @@ const NAV=[
 const SLOT_LABELS={morning:'早上',noon:'中午',evening:'晚上'};
 const ABNORMAL_TYPES=['嘔吐','腹瀉','食慾不振','抽搐','其他'];
 const DOSE_FRACS=[{v:0.25,l:'¼'},{v:0.333,l:'⅓'},{v:0.5,l:'½'},{v:1,l:'1'},{v:2,l:'2'}];
-const POOP_LABELS={normal:'✅ 正常',soft:'💧 稀爛',none:'❌ 未去'};
+const POOP_SOFTNESS_LABELS={1:'1 - 非常硬（粒狀）',2:'2 - 硬',3:'3 - 正常',4:'4 - 軟',5:'5 - 非常軟（水狀）'};
 let state=loadState();
 migrateAllMedBatches();
 let currentView='dashboard';
@@ -800,16 +812,38 @@ function readDailyNoteDay(date){
   const all=getDailyNotes();
   const d=all[date];
   if(!d||typeof d!=='object')return{walks:[],poops:[]};
-  return{walks:Array.isArray(d.walks)?d.walks:[],poops:Array.isArray(d.poops)?d.poops:[]};
+  const poops=(Array.isArray(d.poops)?d.poops:[]).map(normalizePoop).filter(Boolean);
+  return{walks:Array.isArray(d.walks)?d.walks:[],poops};
+}
+function normalizePoop(p){
+  if(!p||typeof p!=='object')return null;
+  if(p.status&&!('hasPoop' in p)){
+    if(p.status==='none')return{id:p.id!=null?p.id:Date.now(),hasPoop:false,time:p.time||''};
+    const softness=p.status==='soft'?5:3;
+    return{id:p.id!=null?p.id:Date.now(),hasPoop:true,count:1,softness,time:p.time||''};
+  }
+  const hasPoop=!!p.hasPoop;
+  return{
+    id:p.id!=null?p.id:Date.now(),
+    hasPoop,
+    count:hasPoop?Math.max(1,parseInt(p.count,10)||1):null,
+    softness:hasPoop?Math.min(5,Math.max(1,parseInt(p.softness,10)||3)):null,
+    time:p.time||''
+  };
+}
+function formatPoopExportText(p){
+  const n=normalizePoop(p);
+  if(!n.hasPoop)return'無大便';
+  return'有 '+n.count+' 次 · '+(POOP_SOFTNESS_LABELS[n.softness]||n.softness);
 }
 function getTodayLifeSummary(){
   const day=readDailyNoteDay(todayStr());
   const walkMin=day.walks.reduce((s,w)=>{const m=Number(w&&w.durationMinutes);return s+(isNaN(m)?0:m);},0);
   const lastPoop=day.poops.length?day.poops[day.poops.length-1]:null;
   const hasWalk=walkMin>0;
-  const hasPoop=!!(lastPoop&&lastPoop.status);
-  if(!hasWalk&&!hasPoop)return null;
-  return{walkMin,lastPoop:hasPoop?lastPoop:null};
+  const hasPoopRecord=!!lastPoop;
+  if(!hasWalk&&!hasPoopRecord)return null;
+  return{walkMin,lastPoop:hasPoopRecord?lastPoop:null};
 }
 function renderSummaryWeightCard(){
   const w=getLatestWeightSummary();
@@ -829,7 +863,11 @@ function renderSummaryLifeCard(){
   const parts=[];
   if(life.walkMin>0)parts.push('散步 '+life.walkMin+' 分鐘');
   if(life.lastPoop){
-    const label=POOP_LABELS[life.lastPoop.status]||life.lastPoop.status;
+    let label;
+    if(life.lastPoop.hasPoop){
+      const soft=POOP_SOFTNESS_LABELS[life.lastPoop.softness]||life.lastPoop.softness;
+      label='有大便 · '+life.lastPoop.count+' 次 · '+soft;
+    }else label='無大便';
     const t=life.lastPoop.time?'（'+esc(life.lastPoop.time)+'）':'';
     parts.push('排便 '+label+t);
   }
@@ -1366,10 +1404,23 @@ function renderWalkListHtml(date,readonly){
     return'<li class="walk-row"><div class="walk-row-info"><strong>'+w.startTime+' · '+w.durationMinutes+' 分鐘</strong>'+noteHtml+'</div>'+delBtn+'</li>';
   }).join('')+'</ul>';
 }
+function renderPoopListHtml(date,readonly){
+  const poops=readDailyNoteDay(date).poops;
+  if(!poops.length)return'';
+  return'<ul class="poop-list">'+poops.map((p,i)=>{
+    const n=normalizePoop(p);
+    const delBtn=readonly?'':'<button type="button" class="btn-walk-del" data-del-poop="'+date+'" data-poop-idx="'+i+'" aria-label="刪除排便紀錄">🗑️</button>';
+    let detail;
+    if(n.hasPoop){
+      const soft=POOP_SOFTNESS_LABELS[n.softness]||n.softness;
+      detail='有大便 · '+n.count+' 次 · '+esc(soft);
+    }else detail='無大便';
+    const timeHtml=n.time?'<br><span style="color:var(--color-text-muted)">記錄時間 '+esc(n.time)+'</span>':'';
+    return'<li class="poop-row"><div class="poop-row-info"><strong>'+esc(date)+'</strong>'+timeHtml+'<br>'+detail+'</div>'+delBtn+'</li>';
+  }).join('')+'</ul>';
+}
 function renderDailyNotesSection(date,readonly){
   const totalWalk=getWalkTotalMinutes(date);
-  const d=readDailyNoteDay(date);
-  const poops=d.poops||[];
   const isToday=date===todayStr();
   const running=walkTimerStart&&scheduleDate===todayStr()&&isToday;
   let elapsed='0:00';
@@ -1377,21 +1428,18 @@ function renderDailyNotesSection(date,readonly){
     const sec=Math.floor((Date.now()-walkTimerStart)/1000);
     elapsed=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
   }
-  const poopCounts={normal:0,soft:0,none:0};
-  poops.forEach(p=>{if(poopCounts[p.status]!=null)poopCounts[p.status]++;});
   const walkList=renderWalkListHtml(date,readonly);
+  const poopList=renderPoopListHtml(date,readonly);
   const manualBtn=readonly?'':'<button type="button" class="btn btn-secondary btn-block" style="margin-top:.75rem" id="walk-manual">✏️ 手動補錄散步</button>';
   const timerBtn=readonly?'':'<button type="button" class="btn btn-primary btn-block" id="walk-toggle">'+(running?'⏹ 停止計時':'▶ 開始計時')+'</button>';
+  const addPoopBtn=readonly?'':'<button type="button" class="btn btn-secondary btn-block" style="margin-top:.75rem" id="poop-add">➕ 新增排便記錄</button>';
   return'<div class="daily-section"><h3>🐾 日常生活紀錄</h3>'+
     '<p style="font-size:.875rem;margin-bottom:.5rem">今日總散步時長：<strong>'+totalWalk+'</strong> 分鐘</p>'+
     (readonly?'<p class="form-hint">唯讀模式</p>':'')+
     '<div class="walk-timer-display" id="walk-display">'+(running?elapsed:'—')+'</div>'+
     timerBtn+manualBtn+walkList+
     '<p style="margin-top:1rem;font-size:.875rem;font-weight:500">排便記錄</p>'+
-    '<div class="poop-btns">'+
-    ['normal','soft','none'].map(s=>'<button type="button" class="poop-btn'+(poopCounts[s]?' active':'')+'" data-poop="'+s+'" '+(readonly?'disabled':'')+'>'+POOP_LABELS[s]+'</button>').join('')+
-    '</div>'+
-    (poops.length?'<ul class="log-history" style="margin-top:.75rem">'+poops.slice().reverse().map(p=>'<li>'+p.time+' · '+POOP_LABELS[p.status]+'</li>').join('')+'</ul>':'')+
+    addPoopBtn+poopList+
     '</div>';
 }
 function renderMealsSection(date,readonly){
@@ -1400,6 +1448,96 @@ function renderMealsSection(date,readonly){
   const rows=meals.map((m,i)=>'<div class="meal-row"><div class="meal-row-info"><strong>'+esc(m.name||('第'+(i+1)+'餐'))+'</strong><p>'+esc(m.note||'—')+'</p></div>'+
     (readonly?'':'<button type="button" class="btn btn-sm btn-secondary" data-edit-meal="'+i+'">✏️ 修改</button>')+'</div>').join('');
   return'<div class="meals-section"><div class="meals-header"><h3>🍽️ 今日餵食份量</h3>'+editTplBtn+'</div>'+rows+'</div>';
+}
+function openPoopModal(opts){
+  opts=opts||{};
+  const dateVal=opts.date||scheduleDate||todayStr();
+  const hasPoop=opts.hasPoop!==false;
+  const countVal=opts.count!=null?opts.count:1;
+  const softnessVal=opts.softness!=null?opts.softness:3;
+  const softnessOpts=Object.keys(POOP_SOFTNESS_LABELS).map(k=>'<option value="'+k+'"'+(String(softnessVal)===k?' selected':'')+'>'+esc(POOP_SOFTNESS_LABELS[k])+'</option>').join('');
+  openModal('新增排便記錄',
+    '<form id="poop-form">'+
+    '<div class="form-group"><label>日期 *</label><input type="date" name="poopDate" required max="'+todayStr()+'" value="'+dateVal+'"></div>'+
+    '<div class="form-group"><label>有無大便 *</label>'+
+    '<div class="poop-btns" id="poop-has-btns">'+
+    '<button type="button" class="poop-btn'+(hasPoop?' active':'')+'" data-poop-has="yes">有</button>'+
+    '<button type="button" class="poop-btn'+(!hasPoop?' active':'')+'" data-poop-has="no">無</button>'+
+    '</div><input type="hidden" name="hasPoop" id="poop-has-input" value="'+(hasPoop?'yes':'no')+'"></div>'+
+    '<div class="poop-detail-fields'+(hasPoop?'':' hidden')+'" id="poop-detail-fields">'+
+    '<div class="form-group"><label>次數 *</label><input type="number" name="count" id="poop-count" min="1" step="1" value="'+countVal+'" inputmode="numeric"></div>'+
+    '<div class="form-group"><label>軟硬度 *</label><select name="softness" id="poop-softness">'+softnessOpts+'</select></div>'+
+    '</div></form>',
+    '<button type="button" class="btn btn-cancel" data-modal-cancel>取消</button><button type="button" class="btn btn-confirm" data-modal-save>儲存</button>');
+  const form=document.getElementById('poop-form');
+  const hasInput=document.getElementById('poop-has-input');
+  const detailFields=document.getElementById('poop-detail-fields');
+  const countInp=document.getElementById('poop-count');
+  const softInp=document.getElementById('poop-softness');
+  function setHasPoop(yes){
+    hasInput.value=yes?'yes':'no';
+    document.querySelectorAll('#poop-has-btns .poop-btn').forEach(b=>{
+      b.classList.toggle('active',b.dataset.poopHas===(yes?'yes':'no'));
+    });
+    detailFields.classList.toggle('hidden',!yes);
+    if(yes){
+      if(!countInp.value||parseInt(countInp.value,10)<1)countInp.value='1';
+      countInp.required=true;
+      softInp.required=true;
+    }else{
+      countInp.value='';
+      softInp.value='3';
+      countInp.required=false;
+      softInp.required=false;
+    }
+  }
+  document.querySelectorAll('#poop-has-btns .poop-btn').forEach(btn=>{
+    btn.onclick=()=>setHasPoop(btn.dataset.poopHas==='yes');
+  });
+  document.querySelector('[data-modal-cancel]').onclick=closeModal;
+  document.querySelector('[data-modal-save]').onclick=()=>{
+    const yes=hasInput.value==='yes';
+    if(yes){
+      countInp.required=true;
+      softInp.required=true;
+    }else{
+      countInp.required=false;
+      softInp.required=false;
+    }
+    if(!form.reportValidity())return;
+    const fd=new FormData(form);
+    const saveDate=fd.get('poopDate');
+    const entry={
+      id:Date.now(),
+      hasPoop:yes,
+      time:nowTimeStr()
+    };
+    if(yes){
+      entry.count=Math.max(1,parseInt(fd.get('count'),10)||1);
+      entry.softness=Math.min(5,Math.max(1,parseInt(fd.get('softness'),10)||3));
+    }
+    const{all,day}=mutateDailyDay(saveDate);
+    day.poops=day.poops||[];
+    day.poops.push(entry);
+    all[saveDate]=day;
+    saveDailyNotes(all);
+    closeModal();
+    renderSchedule();
+    if(currentView==='dashboard')renderDashboard();
+    showToast('排便紀錄已儲存');
+  };
+}
+function deletePoopEntry(date,idx){
+  confirmDialog('刪除排便紀錄','確定要刪除此排便紀錄？',()=>{
+    const{all,day}=mutateDailyDay(date);
+    if(!day.poops||!day.poops[idx])return;
+    day.poops.splice(idx,1);
+    all[date]=day;
+    saveDailyNotes(all);
+    renderSchedule();
+    if(currentView==='dashboard')renderDashboard();
+    showToast('已刪除');
+  });
 }
 function openWalkModal(opts){
   opts=opts||{};
@@ -1546,23 +1684,9 @@ function bindDailyNotesEvents(date,readonly){
   const manualBtn=document.getElementById('walk-manual');
   if(manualBtn)manualBtn.onclick=()=>openWalkModal({date});
   document.querySelectorAll('[data-del-walk]').forEach(b=>b.onclick=()=>deleteWalkEntry(b.dataset.delWalk,+b.dataset.walkIdx));
-  document.querySelectorAll('[data-poop]').forEach(btn=>{
-    btn.onclick=()=>{
-      const status=btn.dataset.poop;
-      const{all,day}=mutateDailyDay(date);
-      day.poops=day.poops||[];
-      if(day.poops.length&&day.poops[day.poops.length-1].status===status){
-        day.poops.pop();
-        showToast('已取消記錄');
-      }else{
-        day.poops.push({status,time:nowTimeStr()});
-        showToast('已記錄 '+POOP_LABELS[status]);
-      }
-      all[date]=day;
-      saveDailyNotes(all);
-      renderSchedule();
-    };
-  });
+  const poopAddBtn=document.getElementById('poop-add');
+  if(poopAddBtn)poopAddBtn.onclick=()=>openPoopModal({date});
+  document.querySelectorAll('[data-del-poop]').forEach(b=>b.onclick=()=>deletePoopEntry(b.dataset.delPoop,+b.dataset.poopIdx));
 }
 function bindMealsEvents(date,readonly){
   if(readonly)return;
@@ -2031,10 +2155,7 @@ function exportCsvHistory(){
   function extraCols(date){
     const day=dailyMap[date]||{};
     const walkTotal=(day.walks||[]).reduce((s,w)=>s+(Number(w.durationMinutes)||0),0);
-    const poopText=(day.poops||[]).map(p=>{
-      const l=POOP_LABELS[p.status]||p.status||'';
-      return l.replace(/^✅\s*|^💧\s*|^❌\s*/,'');
-    }).filter(Boolean).join('/');
+    const poopText=(day.poops||[]).map(p=>formatPoopExportText(p)).filter(Boolean).join(' / ');
     const meals=Array.isArray(day.meals)?day.meals:[];
     const m1=meals[0]&&meals[0].note?meals[0].note:'';
     const m2=meals[1]&&meals[1].note?meals[1].note:'';
@@ -2064,7 +2185,8 @@ function exportCsvHistory(){
     const walkMin=(d.walks||[]).reduce((s,w)=>s+(w.durationMinutes||0),0);
     if(walkMin>0)lines.push(['散步',date,'總時長','',walkMin+'分鐘','','','',...extraCols(date)].map(csvEscape).join(','));
     (d.poops||[]).forEach(p=>{
-      lines.push(['排便',date,POOP_LABELS[p.status]||p.status,p.time||'','','','',...extraCols(date)].map(csvEscape).join(','));
+      const n=normalizePoop(p);
+      lines.push(['排便',date,formatPoopExportText(p),n.time||'',n.hasPoop?n.count:'',n.hasPoop?(POOP_SOFTNESS_LABELS[n.softness]||n.softness):'','','',...extraCols(date)].map(csvEscape).join(','));
     });
   });
   state.abnormalLogs.forEach(a=>{
