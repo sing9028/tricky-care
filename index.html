@@ -349,8 +349,8 @@ const KEY_FOOD_DAILY_PLAN='tricky-food-daily-plan';
 const KEY_OWNER_WEIGHT='tricky-owner-weight';
 const FOOD_FRESH_PACK_G=150;
 const FOOD_CAN_G=420;
-const DEFAULT_FOOD_INVENTORY={freshPacks:0,cans:0};
-const DEFAULT_FOOD_DAILY_PLAN={freshGrams:0,canGrams:0};
+const DEFAULT_FOOD_INVENTORY={freshPacks:0,cans:0,milkGrams:0};
+const DEFAULT_FOOD_DAILY_PLAN={freshGrams:0,canGrams:0,milkGrams:0};
 const DEFAULT_FEED_TEMPLATE=[
   {name:'第1餐',note:'35g 鮮食 + 35g 罐頭'},
   {name:'第2餐',note:'45g 鮮食 + 45g 罐頭'},
@@ -421,7 +421,8 @@ function getFoodInventory(){
       const p=JSON.parse(r);
       return{
         freshPacks:Math.max(0,parseInt(p.freshPacks,10)||0),
-        cans:Math.max(0,parseInt(p.cans,10)||0)
+        cans:Math.max(0,parseInt(p.cans,10)||0),
+        milkGrams:Math.max(0,parseFloat(p.milkGrams)||0)
       };
     }
   }catch(e){}
@@ -435,7 +436,8 @@ function getFoodDailyPlan(){
       const p=JSON.parse(r);
       return{
         freshGrams:Math.max(0,parseFloat(p.freshGrams)||0),
-        canGrams:Math.max(0,parseFloat(p.canGrams)||0)
+        canGrams:Math.max(0,parseFloat(p.canGrams)||0),
+        milkGrams:Math.max(0,parseFloat(p.milkGrams)||0)
       };
     }
   }catch(e){}
@@ -883,19 +885,21 @@ function formatChineseDateLong(dateStr){
 function calcFoodSupply(inventory,plan){
   const freshTotal=Math.max(0,parseInt(inventory.freshPacks,10)||0)*FOOD_FRESH_PACK_G;
   const canTotal=Math.max(0,parseInt(inventory.cans,10)||0)*FOOD_CAN_G;
+  const milkTotal=Math.max(0,parseFloat(inventory.milkGrams)||0);
   const freshDaily=Math.max(0,parseFloat(plan.freshGrams)||0);
   const canDaily=Math.max(0,parseFloat(plan.canGrams)||0);
-  const totalWeight=freshTotal+canTotal;
-  const dailyTotal=freshDaily+canDaily;
-  if(dailyTotal<=0)return{valid:false,reason:'plan',totalWeight,dailyTotal,freshTotal,canTotal};
+  const milkDaily=Math.max(0,parseFloat(plan.milkGrams)||0);
+  const totalWeight=freshTotal+canTotal+milkTotal;
+  const dailyTotal=freshDaily+canDaily+milkDaily;
+  if(dailyTotal<=0)return{valid:false,reason:'plan',totalWeight,dailyTotal,freshTotal,canTotal,milkTotal};
   const daysExact=totalWeight/dailyTotal;
   const days=Math.floor(daysExact);
   const endDate=addDays(todayStr(),days);
-  return{valid:true,days,daysExact,endDate,totalWeight,dailyTotal,freshTotal,canTotal};
+  return{valid:true,days,daysExact,endDate,totalWeight,dailyTotal,freshTotal,canTotal,milkTotal};
 }
 function renderFoodSupplyResultHtml(supply,compact){
   if(!supply.valid){
-    return'<p class="form-hint">請設定每日餵食計劃（鮮食同罐頭份量不可同時為 0）</p>';
+    return'<p class="form-hint">請設定每日餵食計劃（鮮食、罐頭同營養奶份量不可同時為 0）</p>';
   }
   if(supply.totalWeight<=0){
     return'<p class="summary-value" style="font-size:'+(compact?'1rem':'1.375rem')+';color:var(--color-text-muted)">暫無庫存</p>';
@@ -904,7 +908,7 @@ function renderFoodSupplyResultHtml(supply,compact){
   const warnCls=warn?' food-result-warn':'';
   return'<div class="food-result'+warnCls+'"><p class="summary-value">還有 '+supply.days+' 天</p>'+
     '<p class="summary-meta">預計 '+formatChineseDateLong(supply.endDate)+' 用完</p>'+
-    (compact?'':'<p class="form-hint" style="margin-top:.5rem">總庫存 '+supply.totalWeight+' g · 每日 '+supply.dailyTotal+' g（鮮食 '+supply.freshTotal+' g + 罐頭 '+supply.canTotal+' g）</p>')+
+    (compact?'':'<p class="form-hint" style="margin-top:.5rem">總庫存 '+supply.totalWeight+' g · 每日 '+supply.dailyTotal+' g（鮮食 '+supply.freshTotal+' g + 罐頭 '+supply.canTotal+' g + 營養奶 '+supply.milkTotal+' g）</p>')+
     '</div>';
 }
 function renderSummaryFoodCard(){
@@ -923,6 +927,7 @@ function renderFoodInventorySection(){
   const supply=calcFoodSupply(inv,plan);
   const freshSubtotal=inv.freshPacks*FOOD_FRESH_PACK_G;
   const canSubtotal=inv.cans*FOOD_CAN_G;
+  const milkSubtotal=inv.milkGrams;
   return'<div class="card"><h2 class="food-section-title">🍖 食物庫存</h2>'+
     '<div class="form-row">'+
     '<div class="form-group"><label for="food-fresh-packs">鮮食包（每包 '+FOOD_FRESH_PACK_G+'g）</label>'+
@@ -930,34 +935,44 @@ function renderFoodInventorySection(){
     '<p class="form-hint">現有總重：'+freshSubtotal+' g</p></div>'+
     '<div class="form-group"><label for="food-cans">罐頭（每罐 '+FOOD_CAN_G+'g）</label>'+
     '<input type="number" id="food-cans" min="0" step="1" value="'+inv.cans+'" inputmode="numeric">'+
-    '<p class="form-hint">現有總重：'+canSubtotal+' g</p></div></div></div>'+
+    '<p class="form-hint">現有總重：'+canSubtotal+' g</p></div>'+
+    '<div class="form-group"><label for="food-milk-grams">營養奶（每次入 g）</label>'+
+    '<input type="number" id="food-milk-grams" min="0" step="1" value="'+inv.milkGrams+'" inputmode="numeric">'+
+    '<p class="form-hint">現有總重：'+milkSubtotal+' g</p></div></div></div>'+
     '<div class="card"><h2 class="food-section-title">📅 每日餵食計劃</h2>'+
     '<div class="form-row">'+
     '<div class="form-group"><label for="food-daily-fresh">每日鮮食包份量（g）</label>'+
     '<input type="number" id="food-daily-fresh" min="0" step="1" value="'+plan.freshGrams+'" inputmode="numeric"></div>'+
     '<div class="form-group"><label for="food-daily-can">每日罐頭份量（g）</label>'+
-    '<input type="number" id="food-daily-can" min="0" step="1" value="'+plan.canGrams+'" inputmode="numeric"></div></div>'+
-    '<p class="food-plan-error" id="food-plan-error">鮮食同罐頭每日份量不可同時為 0</p></div>'+
+    '<input type="number" id="food-daily-can" min="0" step="1" value="'+plan.canGrams+'" inputmode="numeric"></div>'+
+    '<div class="form-group"><label for="food-daily-milk">每日營養奶份量（g）</label>'+
+    '<input type="number" id="food-daily-milk" min="0" step="1" value="'+plan.milkGrams+'" inputmode="numeric"></div></div>'+
+    '<p class="food-plan-error" id="food-plan-error">鮮食、罐頭同營養奶每日份量不可同時為 0</p></div>'+
     '<div class="card" id="food-supply-card"><h2 class="food-section-title">📊 預計可食用至</h2>'+
     '<div id="food-supply-result">'+renderFoodSupplyResultHtml(supply,false)+'</div></div>';
 }
 function bindFoodInventoryEvents(){
   const freshPacksInp=document.getElementById('food-fresh-packs');
   const cansInp=document.getElementById('food-cans');
+  const milkGramsInp=document.getElementById('food-milk-grams');
   const dailyFreshInp=document.getElementById('food-daily-fresh');
   const dailyCanInp=document.getElementById('food-daily-can');
+  const dailyMilkInp=document.getElementById('food-daily-milk');
   const planErr=document.getElementById('food-plan-error');
   const resultEl=document.getElementById('food-supply-result');
-  if(!freshPacksInp||!cansInp||!dailyFreshInp||!dailyCanInp)return;
+  if(!freshPacksInp||!cansInp||!milkGramsInp||!dailyFreshInp||!dailyCanInp||!dailyMilkInp)return;
+  const planInvalidMsg='鮮食、罐頭同營養奶每日份量不可同時為 0';
   function readInputs(){
     return{
       inventory:{
         freshPacks:Math.max(0,parseInt(freshPacksInp.value,10)||0),
-        cans:Math.max(0,parseInt(cansInp.value,10)||0)
+        cans:Math.max(0,parseInt(cansInp.value,10)||0),
+        milkGrams:Math.max(0,parseFloat(milkGramsInp.value)||0)
       },
       plan:{
         freshGrams:Math.max(0,parseFloat(dailyFreshInp.value)||0),
-        canGrams:Math.max(0,parseFloat(dailyCanInp.value)||0)
+        canGrams:Math.max(0,parseFloat(dailyCanInp.value)||0),
+        milkGrams:Math.max(0,parseFloat(dailyMilkInp.value)||0)
       }
     };
   }
@@ -965,12 +980,15 @@ function bindFoodInventoryEvents(){
     const{inventory,plan}=readInputs();
     const freshSub=inventory.freshPacks*FOOD_FRESH_PACK_G;
     const canSub=inventory.cans*FOOD_CAN_G;
+    const milkSub=inventory.milkGrams;
     freshPacksInp.parentElement.querySelector('.form-hint').textContent='現有總重：'+freshSub+' g';
     cansInp.parentElement.querySelector('.form-hint').textContent='現有總重：'+canSub+' g';
-    const planInvalid=plan.freshGrams<=0&&plan.canGrams<=0;
+    milkGramsInp.parentElement.querySelector('.form-hint').textContent='現有總重：'+milkSub+' g';
+    const planInvalid=plan.freshGrams<=0&&plan.canGrams<=0&&plan.milkGrams<=0;
     planErr.classList.toggle('visible',planInvalid);
-    dailyFreshInp.setCustomValidity(planInvalid?'鮮食同罐頭每日份量不可同時為 0':'');
-    dailyCanInp.setCustomValidity(planInvalid?'鮮食同罐頭每日份量不可同時為 0':'');
+    dailyFreshInp.setCustomValidity(planInvalid?planInvalidMsg:'');
+    dailyCanInp.setCustomValidity(planInvalid?planInvalidMsg:'');
+    dailyMilkInp.setCustomValidity(planInvalid?planInvalidMsg:'');
     const supply=calcFoodSupply(inventory,plan);
     if(resultEl)resultEl.innerHTML=renderFoodSupplyResultHtml(supply,false);
     saveFoodInventory(inventory);
@@ -983,7 +1001,7 @@ function bindFoodInventoryEvents(){
       }
     }
   }
-  [freshPacksInp,cansInp,dailyFreshInp,dailyCanInp].forEach(inp=>{
+  [freshPacksInp,cansInp,milkGramsInp,dailyFreshInp,dailyCanInp,dailyMilkInp].forEach(inp=>{
     inp.addEventListener('input',updateDisplay);
     inp.addEventListener('change',updateDisplay);
   });
